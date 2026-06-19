@@ -1,0 +1,10 @@
+import { Router } from 'express';
+import { copy, create, details, featured, home, listPublic, remove, update } from '../controllers/prompt-controller.js';
+import { report, review, toggleBookmark } from '../controllers/interaction-controller.js';
+import { authenticate } from '../middleware/auth.js';
+import { asyncHandler } from '../utils/async-handler.js';
+const router = Router();
+router.get('/home', asyncHandler(home)); router.get('/featured', asyncHandler(featured)); router.get('/', asyncHandler(listPublic));
+router.post('/', authenticate, asyncHandler(create)); router.get('/:id', authenticate, asyncHandler(details)); router.patch('/:id', authenticate, asyncHandler(update)); router.delete('/:id', authenticate, asyncHandler(remove));
+router.post('/:id/copy', authenticate, asyncHandler(copy)); router.put('/:id/bookmark', authenticate, asyncHandler(toggleBookmark)); router.post('/:id/reviews', authenticate, asyncHandler(review)); router.post('/:id/reports', authenticate, asyncHandler(report));
+export default router;
