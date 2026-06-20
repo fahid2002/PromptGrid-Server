@@ -4,6 +4,8 @@ import Prompt from '../models/Prompt.js';
 import Review from '../models/Review.js';
 import Report from '../models/Report.js';
 import User from '../models/User.js';
+import { recordAudit } from '../services/audit-service.js';
+import { notifyAdmins } from '../services/notification-service.js';
 import { canAccessPromptContent, canManagePrompt, serializePrompt } from '../services/prompt-access.js';
 import { buildPromptQuery, featuredPromptSort, normalizePagination, promptSort } from '../services/prompt-query.js';
 import { AppError } from '../utils/AppError.js';
@@ -38,6 +40,10 @@ export async function create(request, response) {
   const input = promptSchema.parse(request.body);
   if (request.user.subscription === 'free' && await Prompt.countDocuments({ creator: request.user._id }) >= 3) throw new AppError(403, 'Free users can publish up to 3 prompts');
   const prompt = await Prompt.create({ ...input, creator: request.user._id, copyCount: 0, status: 'pending', featured: false });
+  await Promise.all([
+    notifyAdmins({ type: 'prompt_submitted', title: 'Prompt awaiting approval', message: `${request.user.name} submitted “${prompt.title}”.`, href: '/dashboard?view=admin-prompts', relatedPrompt: prompt._id, eventKey: `prompt_submitted:${prompt._id}` }),
+    recordAudit({ actor: request.user._id, action: 'prompt_submitted', targetType: 'prompt', targetId: prompt._id, summary: `Submitted prompt: ${prompt.title}`, snapshot: prompt.toObject() }),
+  ]);
   response.status(201).json({ prompt });
 }
 
@@ -56,7 +62,8 @@ export async function remove(request, response) {
   const prompt = await Prompt.findById(request.params.id);
   if (!prompt) throw new AppError(404, 'Prompt not found');
   if (!canManagePrompt(request.user, prompt)) throw new AppError(403, 'Only the creator or an admin can delete this prompt');
-  await Promise.all([prompt.deleteOne(), Bookmark.deleteMany({ prompt: prompt._id }), Review.deleteMany({ prompt: prompt._id }), Report.deleteMany({ prompt: prompt._id })]);
+  const snapshot = prompt.toObject();
+  await Promise.all([prompt.deleteOne(), Bookmark.deleteMany({ prompt: prompt._id }), Review.deleteMany({ prompt: prompt._id }), Report.deleteMany({ prompt: prompt._id }), recordAudit({ actor: request.user._id, action: 'prompt_deleted', targetType: 'prompt', targetId: prompt._id, summary: `Deleted prompt: ${prompt.title}`, snapshot })]);
   response.status(204).end();
 }
 

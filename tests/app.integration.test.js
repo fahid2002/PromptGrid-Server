@@ -53,6 +53,9 @@ describe('authenticated marketplace flow', () => {
     await request(app).post('/api/auth/register').field('name', 'Blocked Admin').field('email', 'blocked-admin@example.com').field('password', 'securepass123').field('role', 'admin').expect(400);
     await request(app).post('/api/auth/register').field('name', 'Invalid Photo').field('email', 'invalid-photo@example.com').field('password', 'securepass123').field('role', 'user').attach('image', Buffer.from('not an image'), { filename: 'profile.txt', contentType: 'text/plain' }).expect(400);
     await request(app).post('/api/auth/register').field('name', 'Large Photo').field('email', 'large-photo@example.com').field('password', 'securepass123').field('role', 'user').attach('image', Buffer.alloc((5 * 1024 * 1024) + 1), { filename: 'profile.png', contentType: 'image/png' }).expect(413);
+    const withPhoto = await request(app).post('/api/auth/register').field('name', 'Photo User').field('email', 'photo@example.com').field('password', 'securepass123').field('role', 'user').attach('image', Buffer.from('89504e470d0a1a0a', 'hex'), { filename: 'profile.png', contentType: 'image/png' }).expect(201);
+    expect(withPhoto.body.user.photoURL).toMatch(/^\/api\/images\/[a-f\d]{24}$/);
+    await request(app).get(withPhoto.body.user.photoURL).expect(200).expect('Content-Type', /image\/png/);
   });
 
   it('registers, logs in by cookie, enforces the free limit, and protects premium content', async () => {

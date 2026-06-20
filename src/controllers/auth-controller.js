@@ -3,7 +3,7 @@ import { env } from '../config/env.js';
 import User from '../models/User.js';
 import { ACCESS_COOKIE_NAME, ACCESS_SESSION_MS, cookieOptions, hashPassword, normalizeRegistration, REFRESH_COOKIE_NAME, REFRESH_SESSION_MS, signToken, verifyPassword } from '../services/auth-service.js';
 import { resolveGoogleAccount } from '../services/google-account.js';
-import { uploadImageBuffer } from '../services/image-upload.js';
+import { storeImage } from '../services/gridfs-image.js';
 import { createRefreshSession, revokeRefreshSession, rotateRefreshSession } from '../services/session-service.js';
 import { AppError } from '../utils/AppError.js';
 import { googleSchema, loginSchema, registerSchema } from '../validators/auth-input.js';
@@ -23,7 +23,7 @@ async function setSession(response, user) {
 export async function register(request, response) {
   const input = normalizeRegistration(registerSchema.parse(request.body));
   if (await User.exists({ email: input.email })) throw new AppError(409, 'An account already exists for this email');
-  const photoURL = request.file ? await uploadImageBuffer(request.file, { folder: 'promptgrid/profiles', width: 600, height: 600 }) : '';
+  const photoURL = request.file ? (await storeImage(request.file)).url : '';
   const user = await User.create({ ...input, photoURL, passwordHash: await hashPassword(input.password), password: undefined });
   response.status(201).json({ user });
 }
