@@ -9,9 +9,11 @@
   "scripts": {
     "dev": "node --watch src/index.js",
     "dev:memory": "node scripts/memory-server.js",
+    "seed:admin": "node scripts/seed-admin.js",
+    "seed:prompts": "node scripts/seed-prompts.js",
     "start": "node src/index.js",
     "lint": "eslint src tests scripts",
-    "test": "vitest run",
+    "test": "vitest run --fileParallelism=false",
     "test:watch": "vitest"
   },
   "devDependencies": {

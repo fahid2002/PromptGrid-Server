@@ -20,3 +20,7 @@ export function promptSort(sort = 'popular') {
   if (sort === 'latest') return { createdAt: -1 };
   return { averageRating: -1, copyCount: -1, createdAt: -1 };
 }
+
+export function featuredPromptSort() {
+  return { copyCount: -1, averageRating: -1, createdAt: -1 };
+}

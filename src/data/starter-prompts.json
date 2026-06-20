@@ -16,7 +16,6 @@
     "status": "approved",
     "featured": false,
     "rejectionFeedback": "",
-    "creator": { "$oid": "000000000000000000000001" },
     "createdAt": { "$date": "2026-06-19T01:00:00.000Z" },
     "updatedAt": { "$date": "2026-06-19T01:00:00.000Z" }
   },
@@ -37,7 +36,6 @@
     "status": "approved",
     "featured": false,
     "rejectionFeedback": "",
-    "creator": { "$oid": "000000000000000000000001" },
     "createdAt": { "$date": "2026-06-19T01:01:00.000Z" },
     "updatedAt": { "$date": "2026-06-19T01:01:00.000Z" }
   },
@@ -58,7 +56,6 @@
     "status": "approved",
     "featured": false,
     "rejectionFeedback": "",
-    "creator": { "$oid": "000000000000000000000001" },
     "createdAt": { "$date": "2026-06-19T01:02:00.000Z" },
     "updatedAt": { "$date": "2026-06-19T01:02:00.000Z" }
   },
@@ -79,7 +76,6 @@
     "status": "approved",
     "featured": false,
     "rejectionFeedback": "",
-    "creator": { "$oid": "000000000000000000000001" },
     "createdAt": { "$date": "2026-06-19T01:03:00.000Z" },
     "updatedAt": { "$date": "2026-06-19T01:03:00.000Z" }
   },
@@ -100,7 +96,6 @@
     "status": "approved",
     "featured": false,
     "rejectionFeedback": "",
-    "creator": { "$oid": "000000000000000000000001" },
     "createdAt": { "$date": "2026-06-19T01:04:00.000Z" },
     "updatedAt": { "$date": "2026-06-19T01:04:00.000Z" }
   },
@@ -121,7 +116,6 @@
     "status": "approved",
     "featured": false,
     "rejectionFeedback": "",
-    "creator": { "$oid": "000000000000000000000001" },
     "createdAt": { "$date": "2026-06-19T01:05:00.000Z" },
     "updatedAt": { "$date": "2026-06-19T01:05:00.000Z" }
   },
@@ -142,7 +136,6 @@
     "status": "approved",
     "featured": false,
     "rejectionFeedback": "",
-    "creator": { "$oid": "000000000000000000000001" },
     "createdAt": { "$date": "2026-06-19T01:06:00.000Z" },
     "updatedAt": { "$date": "2026-06-19T01:06:00.000Z" }
   },
@@ -163,7 +156,6 @@
     "status": "approved",
     "featured": false,
     "rejectionFeedback": "",
-    "creator": { "$oid": "000000000000000000000001" },
     "createdAt": { "$date": "2026-06-19T01:07:00.000Z" },
     "updatedAt": { "$date": "2026-06-19T01:07:00.000Z" }
   },
@@ -184,7 +176,6 @@
     "status": "approved",
     "featured": false,
     "rejectionFeedback": "",
-    "creator": { "$oid": "000000000000000000000001" },
     "createdAt": { "$date": "2026-06-19T01:08:00.000Z" },
     "updatedAt": { "$date": "2026-06-19T01:08:00.000Z" }
   },
@@ -205,7 +196,6 @@
     "status": "approved",
     "featured": false,
     "rejectionFeedback": "",
-    "creator": { "$oid": "000000000000000000000001" },
     "createdAt": { "$date": "2026-06-19T01:09:00.000Z" },
     "updatedAt": { "$date": "2026-06-19T01:09:00.000Z" }
   }

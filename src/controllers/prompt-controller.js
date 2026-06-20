@@ -5,13 +5,13 @@ import Review from '../models/Review.js';
 import Report from '../models/Report.js';
 import User from '../models/User.js';
 import { canAccessPromptContent, canManagePrompt, serializePrompt } from '../services/prompt-access.js';
-import { buildPromptQuery, normalizePagination, promptSort } from '../services/prompt-query.js';
+import { buildPromptQuery, featuredPromptSort, normalizePagination, promptSort } from '../services/prompt-query.js';
 import { AppError } from '../utils/AppError.js';
 
 const promptSchema = z.object({ title: z.string().trim().min(3).max(160), description: z.string().trim().min(10).max(1200), content: z.string().min(10).max(20000), category: z.string().trim().min(2), aiTool: z.string().trim().min(2), tags: z.array(z.string().trim().min(1)).min(1).max(12), difficulty: z.enum(['Beginner', 'Intermediate', 'Pro']), usageInstructions: z.string().trim().min(10).max(3000), thumbnailURL: z.string().url(), visibility: z.enum(['public', 'private']) });
 
 export async function featured(_request, response) {
-  const prompts = await Prompt.find({ status: 'approved' }).sort({ featured: -1, copyCount: -1, averageRating: -1 }).limit(6).populate('creator', 'name photoURL');
+  const prompts = await Prompt.find({ status: 'approved', visibility: 'public' }).sort(featuredPromptSort()).limit(6).populate('creator', 'name photoURL');
   response.json({ prompts: prompts.map((prompt) => serializePrompt(prompt, null)) });
 }
 
@@ -70,7 +70,7 @@ export async function copy(request, response) {
 
 export async function home(_request, response) {
   const [featuredPrompts, topCreators, reviews, categories, totals] = await Promise.all([
-    Prompt.find({ status: 'approved' }).sort({ featured: -1, copyCount: -1 }).limit(6).populate('creator', 'name photoURL'),
+    Prompt.find({ status: 'approved', visibility: 'public' }).sort(featuredPromptSort()).limit(6).populate('creator', 'name photoURL'),
     Prompt.aggregate([{ $match: { status: 'approved' } }, { $group: { _id: '$creator', prompts: { $sum: 1 }, copies: { $sum: '$copyCount' }, rating: { $avg: '$averageRating' } } }, { $sort: { copies: -1 } }, { $limit: 4 }, { $lookup: { from: User.collection.name, localField: '_id', foreignField: '_id', as: 'user' } }, { $unwind: '$user' }, { $project: { prompts: 1, copies: 1, rating: 1, user: { _id: 1, name: 1, photoURL: 1 } } }]),
     Review.find().sort({ createdAt: -1 }).limit(4).populate('user', 'name photoURL').populate('prompt', 'title'),
     Prompt.distinct('category', { status: 'approved', visibility: 'public' }),

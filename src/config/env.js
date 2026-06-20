@@ -13,6 +13,9 @@ const schema = z.object({
   CLOUDINARY_CLOUD_NAME: z.string().optional(),
   CLOUDINARY_API_KEY: z.string().optional(),
   CLOUDINARY_API_SECRET: z.string().optional(),
+  ADMIN_NAME: z.string().trim().min(2).max(80).default('PromptGrid Admin'),
+  ADMIN_EMAIL: z.string().email().optional(),
+  ADMIN_PASSWORD: z.string().min(12).max(128).optional(),
 });
 
 export const env = schema.parse(process.env);
