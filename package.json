@@ -11,6 +11,7 @@
     "dev:memory": "node scripts/memory-server.js",
     "seed:admin": "node scripts/seed-admin.js",
     "seed:prompts": "node scripts/seed-prompts.js",
+    "migrate:database": "node scripts/migrate-database.js",
     "start": "node src/index.js",
     "lint": "eslint src tests scripts",
     "test": "vitest run --fileParallelism=false",

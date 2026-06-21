@@ -5,6 +5,7 @@ const schema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
   PORT: z.coerce.number().default(5000),
   MONGODB_URI: z.string().min(1),
+  MONGODB_DB: z.string().trim().min(1).default('promptgrid'),
   JWT_SECRET: z.string().min(32),
   CLIENT_URL: z.string().url(),
   GOOGLE_CLIENT_ID: z.string().optional(),

@@ -15,6 +15,8 @@ services:
         value: "24"
       - key: MONGODB_URI
         sync: false
+      - key: MONGODB_DB
+        value: promptgrid
       - key: JWT_SECRET
         sync: false
       - key: CLIENT_URL

@@ -13,15 +13,17 @@ export function buildStarterPromptOperations(prompts, creatorId) {
       updateOne: {
         filter: { title: cleanPrompt.title, creator: creatorId },
         update: {
-          $set: {
+          $setOnInsert: {
             ...cleanPrompt,
             creator: creatorId,
             status: 'approved',
             visibility: 'public',
             featured: false,
             rejectionFeedback: '',
+            copyCount: 0,
+            averageRating: 0,
+            reviewCount: 0,
           },
-          $setOnInsert: { copyCount: 0, averageRating: 0, reviewCount: 0 },
         },
         upsert: true,
       },

@@ -25,10 +25,7 @@ describe('starter prompt bootstrap', () => {
     expect(operations).toEqual([expect.objectContaining({
       updateOne: expect.objectContaining({
         filter: { title: 'One', creator: 'creator-id' },
-        update: {
-          $set: expect.objectContaining({ creator: 'creator-id', status: 'approved', visibility: 'public', featured: false }),
-          $setOnInsert: { copyCount: 0, averageRating: 0, reviewCount: 0 },
-        },
+        update: { $setOnInsert: expect.objectContaining({ creator: 'creator-id', status: 'approved', visibility: 'public', featured: false, copyCount: 0 }) },
         upsert: true,
       }),
     })]);
