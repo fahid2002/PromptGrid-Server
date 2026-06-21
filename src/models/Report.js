@@ -1,3 +1,53 @@
 import mongoose from 'mongoose';
-const schema = new mongoose.Schema({ prompt: { type: mongoose.Schema.Types.ObjectId, ref: 'Prompt', required: true, index: true }, reporter: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }, reason: { type: String, enum: ['Inappropriate Content', 'Spam', 'Copyright Violation'], required: true }, description: { type: String, default: '', maxlength: 1200 }, status: { type: String, enum: ['pending', 'removed', 'warned', 'dismissed'], default: 'pending', index: true } }, { timestamps: true });
+
+// Report schema stores user reports against prompts
+const schema = new mongoose.Schema(
+  {
+    prompt: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Prompt',
+      required: true,
+      index: true,
+    },
+
+    reporter: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      required: true,
+    },
+
+    reason: {
+      type: String,
+      enum: [
+        'Inappropriate Content',
+        'Spam',
+        'Copyright Violation',
+      ],
+      required: true,
+    },
+
+    description: {
+      type: String,
+      default: '',
+      maxlength: 1200,
+    },
+
+    status: {
+      type: String,
+      enum: [
+        'pending',
+        'removed',
+        'warned',
+        'dismissed',
+      ],
+      default: 'pending',
+      index: true,
+    },
+  },
+  {
+    timestamps: true,
+  }
+);
+
+// Reuse existing model if already compiled, otherwise create new Report model
 export default mongoose.models.Report || mongoose.model('Report', schema);
