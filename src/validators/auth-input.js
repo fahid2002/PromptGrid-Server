@@ -16,7 +16,7 @@ export const loginSchema = z.object({
 });
 
 export const googleSchema = z.object({
-  credential: z.string().min(1),
+  accessToken: z.string().min(1),
   intent: z.enum(['register', 'login']),
   role: publicRoleSchema.default('user'),
 });

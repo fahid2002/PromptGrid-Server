@@ -2,7 +2,8 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { MongoMemoryServer } from 'mongodb-memory-server';
 import mongoose from 'mongoose';
 import User from '../src/models/User.js';
-import { resolveGoogleAccount } from '../src/services/google-account.js';
+import { resolveGoogleAccount, shouldCreateGoogleSession } from '../src/services/google-account.js';
+import { googleSchema } from '../src/validators/auth-input.js';
 
 let mongo;
 
@@ -18,6 +19,12 @@ afterAll(async () => {
 
 describe('Google account intent', () => {
   const creatorProfile = { subject: 'google-creator', email: 'creator@gmail.com', name: 'Google Creator', photoURL: 'https://example.com/photo.jpg' };
+
+  it('accepts access-token payloads and creates sessions only for login', () => {
+    expect(googleSchema.parse({ accessToken: 'token', intent: 'register', role: 'creator' })).toEqual({ accessToken: 'token', intent: 'register', role: 'creator' });
+    expect(shouldCreateGoogleSession('register')).toBe(false);
+    expect(shouldCreateGoogleSession('login')).toBe(true);
+  });
 
   it('registers an unknown verified email with the selected public role', async () => {
     const user = await resolveGoogleAccount({ profile: creatorProfile, intent: 'register', role: 'creator', UserModel: User });

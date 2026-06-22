@@ -1,5 +1,7 @@
 import { AppError } from '../utils/AppError.js';
 
+export const shouldCreateGoogleSession = (intent) => intent === 'login';
+
 export async function resolveGoogleAccount({ profile, intent, role, UserModel }) {
   const email = profile.email.trim().toLowerCase();
   const existing = await UserModel.findOne({ email }).select('+googleSubject');

@@ -12,7 +12,10 @@ import {
   signToken,
   verifyPassword,
 } from '../services/auth-service.js';
-import { resolveGoogleAccount } from '../services/google-account.js';
+import {
+  resolveGoogleAccount,
+  shouldCreateGoogleSession,
+} from '../services/google-account.js';
 import { storeImage } from '../services/gridfs-image.js';
 import {
   createRefreshSession,
@@ -128,18 +131,25 @@ export async function googleLogin(request, response) {
   }
 
   const {
-    credential,
+    accessToken,
     intent,
     role,
   } = googleSchema.parse(request.body);
 
-  // Verify Google credential token
-  const ticket = await new OAuth2Client(env.GOOGLE_CLIENT_ID).verifyIdToken({
-    idToken: credential,
-    audience: env.GOOGLE_CLIENT_ID,
-  });
+  // Verify the popup OAuth token belongs to this web client before using it.
+  const googleClient = new OAuth2Client(env.GOOGLE_CLIENT_ID);
+  const tokenInfo = await googleClient.getTokenInfo(accessToken);
+  if (tokenInfo.aud !== env.GOOGLE_CLIENT_ID) {
+    throw new AppError(401, 'Google token was issued for another application');
+  }
 
-  const payload = ticket.getPayload();
+  const profileResponse = await fetch('https://openidconnect.googleapis.com/v1/userinfo', {
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
+  if (!profileResponse.ok) {
+    throw new AppError(401, 'Unable to verify Google account');
+  }
+  const payload = await profileResponse.json();
 
   // Require verified Google email
   if (!payload?.email || !payload.email_verified) {
@@ -159,7 +169,9 @@ export async function googleLogin(request, response) {
     UserModel: User,
   });
 
-  await setSession(response, user);
+  if (shouldCreateGoogleSession(intent)) {
+    await setSession(response, user);
+  }
 
   response.json({
     user,
