@@ -119,12 +119,10 @@ export async function listPublic(request, response) {
 
     Prompt.distinct('category', {
       status: 'approved',
-      visibility: 'public',
     }),
 
     Prompt.distinct('aiTool', {
       status: 'approved',
-      visibility: 'public',
     }),
   ]);
 

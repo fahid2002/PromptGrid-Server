@@ -1,0 +1,1907 @@
+{
+  "databaseName": "promptgrid",
+  "collections": [
+    {
+      "name": "reviews",
+      "documentCount": 1,
+      "indexes": [
+        {
+          "v": 2,
+          "key": {
+            "_id": 1
+          },
+          "name": "_id_"
+        },
+        {
+          "v": 2,
+          "key": {
+            "prompt": 1
+          },
+          "name": "prompt_1"
+        },
+        {
+          "v": 2,
+          "key": {
+            "user": 1,
+            "prompt": 1
+          },
+          "name": "user_1_prompt_1",
+          "unique": true
+        }
+      ],
+      "fieldTypes": {
+        "_id": [
+          "object"
+        ],
+        "__v": [
+          "number"
+        ],
+        "comment": [
+          "string"
+        ],
+        "createdAt": [
+          "date"
+        ],
+        "prompt": [
+          "object"
+        ],
+        "rating": [
+          "number"
+        ],
+        "updatedAt": [
+          "date"
+        ],
+        "user": [
+          "object"
+        ]
+      },
+      "sampleDocuments": [
+        {
+          "_id": {
+            "buffer": {
+              "0": 106,
+              "1": 54,
+              "2": 152,
+              "3": 12,
+              "4": 40,
+              "5": 160,
+              "6": 108,
+              "7": 139,
+              "8": 169,
+              "9": 70,
+              "10": 148,
+              "11": 104
+            }
+          },
+          "__v": 0,
+          "comment": "Good",
+          "createdAt": {},
+          "prompt": {
+            "buffer": {
+              "0": 106,
+              "1": 54,
+              "2": 136,
+              "3": 110,
+              "4": 40,
+              "5": 160,
+              "6": 108,
+              "7": 139,
+              "8": 169,
+              "9": 70,
+              "10": 148,
+              "11": 52
+            }
+          },
+          "rating": 5,
+          "updatedAt": {},
+          "user": {
+            "buffer": {
+              "0": 106,
+              "1": 54,
+              "2": 136,
+              "3": 106,
+              "4": 40,
+              "5": 160,
+              "6": 108,
+              "7": 139,
+              "8": 169,
+              "9": 70,
+              "10": 148,
+              "11": 51
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "notifications",
+      "documentCount": 9,
+      "indexes": [
+        {
+          "v": 2,
+          "key": {
+            "_id": 1
+          },
+          "name": "_id_"
+        },
+        {
+          "v": 2,
+          "key": {
+            "recipient": 1
+          },
+          "name": "recipient_1"
+        },
+        {
+          "v": 2,
+          "key": {
+            "eventKey": 1
+          },
+          "name": "eventKey_1",
+          "unique": true
+        },
+        {
+          "v": 2,
+          "key": {
+            "expiresAt": 1
+          },
+          "name": "expiresAt_1",
+          "expireAfterSeconds": 0
+        },
+        {
+          "v": 2,
+          "key": {
+            "recipient": 1,
+            "readAt": 1,
+            "createdAt": -1
+          },
+          "name": "recipient_1_readAt_1_createdAt_-1"
+        }
+      ],
+      "fieldTypes": {
+        "_id": [
+          "object"
+        ],
+        "__v": [
+          "number"
+        ],
+        "createdAt": [
+          "date"
+        ],
+        "eventKey": [
+          "string"
+        ],
+        "expiresAt": [
+          "date"
+        ],
+        "href": [
+          "string"
+        ],
+        "message": [
+          "string"
+        ],
+        "readAt": [
+          "date"
+        ],
+        "recipient": [
+          "object"
+        ],
+        "recipientRole": [
+          "string"
+        ],
+        "relatedReport": [
+          "object"
+        ],
+        "title": [
+          "string"
+        ],
+        "type": [
+          "string"
+        ],
+        "updatedAt": [
+          "date"
+        ],
+        "relatedPrompt": [
+          "object"
+        ]
+      },
+      "sampleDocuments": [
+        {
+          "_id": {
+            "buffer": {
+              "0": 106,
+              "1": 54,
+              "2": 234,
+              "3": 189,
+              "4": 40,
+              "5": 160,
+              "6": 108,
+              "7": 139,
+              "8": 169,
+              "9": 70,
+              "10": 149,
+              "11": 164
+            }
+          },
+          "__v": 0,
+          "createdAt": {},
+          "eventKey": "report_action:6a368feb8eec0cdd4c6abdec:removed:reporter",
+          "expiresAt": {},
+          "href": "/dashboard",
+          "message": "Your report was removed.",
+          "readAt": {},
+          "recipient": {
+            "buffer": {
+              "0": 106,
+              "1": 54,
+              "2": 136,
+              "3": 106,
+              "4": 40,
+              "5": 160,
+              "6": 108,
+              "7": 139,
+              "8": 169,
+              "9": 70,
+              "10": 148,
+              "11": 51
+            }
+          },
+          "recipientRole": "admin",
+          "relatedReport": {
+            "buffer": {
+              "0": 106,
+              "1": 54,
+              "2": 143,
+              "3": 235,
+              "4": 142,
+              "5": 236,
+              "6": 12,
+              "7": 221,
+              "8": 76,
+              "9": 106,
+              "10": 189,
+              "11": 236
+            }
+          },
+          "title": "Report resolved",
+          "type": "report_resolved",
+          "updatedAt": {}
+        },
+        {
+          "_id": {
+            "buffer": {
+              "0": 106,
+              "1": 56,
+              "2": 84,
+              "3": 250,
+              "4": 40,
+              "5": 160,
+              "6": 108,
+              "7": 139,
+              "8": 169,
+              "9": 70,
+              "10": 173,
+              "11": 21
+            }
+          },
+          "eventKey": "moderation:6a36886e28a06c8ba9469436:approved:1782076666427",
+          "__v": 0,
+          "createdAt": {},
+          "expiresAt": {},
+          "href": "/dashboard?view=my-prompts",
+          "message": "“Modern SaaS Landing Page Art Director” is now public.",
+          "recipient": {
+            "buffer": {
+              "0": 106,
+              "1": 54,
+              "2": 136,
+              "3": 106,
+              "4": 40,
+              "5": 160,
+              "6": 108,
+              "7": 139,
+              "8": 169,
+              "9": 70,
+              "10": 148,
+              "11": 51
+            }
+          },
+          "recipientRole": "admin",
+          "relatedPrompt": {
+            "buffer": {
+              "0": 106,
+              "1": 54,
+              "2": 136,
+              "3": 110,
+              "4": 40,
+              "5": 160,
+              "6": 108,
+              "7": 139,
+              "8": 169,
+              "9": 70,
+              "10": 148,
+              "11": 54
+            }
+          },
+          "title": "Prompt approved",
+          "type": "prompt_approved",
+          "updatedAt": {},
+          "readAt": {}
+        },
+        {
+          "_id": {
+            "buffer": {
+              "0": 106,
+              "1": 56,
+              "2": 84,
+              "3": 251,
+              "4": 40,
+              "5": 160,
+              "6": 108,
+              "7": 139,
+              "8": 169,
+              "9": 70,
+              "10": 173,
+              "11": 22
+            }
+          },
+          "eventKey": "moderation:6a36886e28a06c8ba9469436:approved:1782076667380",
+          "__v": 0,
+          "createdAt": {},
+          "expiresAt": {},
+          "href": "/dashboard?view=my-prompts",
+          "message": "“Modern SaaS Landing Page Art Director” is now public.",
+          "recipient": {
+            "buffer": {
+              "0": 106,
+              "1": 54,
+              "2": 136,
+              "3": 106,
+              "4": 40,
+              "5": 160,
+              "6": 108,
+              "7": 139,
+              "8": 169,
+              "9": 70,
+              "10": 148,
+              "11": 51
+            }
+          },
+          "recipientRole": "admin",
+          "relatedPrompt": {
+            "buffer": {
+              "0": 106,
+              "1": 54,
+              "2": 136,
+              "3": 110,
+              "4": 40,
+              "5": 160,
+              "6": 108,
+              "7": 139,
+              "8": 169,
+              "9": 70,
+              "10": 148,
+              "11": 54
+            }
+          },
+          "title": "Prompt approved",
+          "type": "prompt_approved",
+          "updatedAt": {},
+          "readAt": {}
+        }
+      ]
+    },
+    {
+      "name": "reports",
+      "documentCount": 1,
+      "indexes": [
+        {
+          "v": 2,
+          "key": {
+            "_id": 1
+          },
+          "name": "_id_"
+        },
+        {
+          "v": 2,
+          "key": {
+            "prompt": 1
+          },
+          "name": "prompt_1"
+        },
+        {
+          "v": 2,
+          "key": {
+            "status": 1
+          },
+          "name": "status_1"
+        }
+      ],
+      "fieldTypes": {
+        "_id": [
+          "object"
+        ],
+        "__v": [
+          "number"
+        ],
+        "createdAt": [
+          "date"
+        ],
+        "description": [
+          "string"
+        ],
+        "prompt": [
+          "object"
+        ],
+        "reason": [
+          "string"
+        ],
+        "reporter": [
+          "object"
+        ],
+        "status": [
+          "string"
+        ],
+        "updatedAt": [
+          "date"
+        ]
+      },
+      "sampleDocuments": [
+        {
+          "_id": {
+            "buffer": {
+              "0": 106,
+              "1": 54,
+              "2": 143,
+              "3": 235,
+              "4": 142,
+              "5": 236,
+              "6": 12,
+              "7": 221,
+              "8": 76,
+              "9": 106,
+              "10": 189,
+              "11": 236
+            }
+          },
+          "__v": 0,
+          "createdAt": {},
+          "description": "",
+          "prompt": {
+            "buffer": {
+              "0": 106,
+              "1": 54,
+              "2": 136,
+              "3": 110,
+              "4": 40,
+              "5": 160,
+              "6": 108,
+              "7": 139,
+              "8": 169,
+              "9": 70,
+              "10": 148,
+              "11": 55
+            }
+          },
+          "reason": "Spam",
+          "reporter": {
+            "buffer": {
+              "0": 106,
+              "1": 54,
+              "2": 136,
+              "3": 106,
+              "4": 40,
+              "5": 160,
+              "6": 108,
+              "7": 139,
+              "8": 169,
+              "9": 70,
+              "10": 148,
+              "11": 51
+            }
+          },
+          "status": "dismissed",
+          "updatedAt": {}
+        }
+      ]
+    },
+    {
+      "name": "prompts",
+      "documentCount": 12,
+      "indexes": [
+        {
+          "v": 2,
+          "key": {
+            "_id": 1
+          },
+          "name": "_id_"
+        },
+        {
+          "v": 2,
+          "key": {
+            "category": 1
+          },
+          "name": "category_1"
+        },
+        {
+          "v": 2,
+          "key": {
+            "aiTool": 1
+          },
+          "name": "aiTool_1"
+        },
+        {
+          "v": 2,
+          "key": {
+            "difficulty": 1
+          },
+          "name": "difficulty_1"
+        },
+        {
+          "v": 2,
+          "key": {
+            "visibility": 1
+          },
+          "name": "visibility_1"
+        },
+        {
+          "v": 2,
+          "key": {
+            "status": 1
+          },
+          "name": "status_1"
+        },
+        {
+          "v": 2,
+          "key": {
+            "featured": 1
+          },
+          "name": "featured_1"
+        },
+        {
+          "v": 2,
+          "key": {
+            "creator": 1
+          },
+          "name": "creator_1"
+        },
+        {
+          "v": 2,
+          "key": {
+            "_fts": "text",
+            "_ftsx": 1
+          },
+          "name": "title_text_description_text_tags_text_aiTool_text",
+          "weights": {
+            "aiTool": 1,
+            "description": 1,
+            "tags": 1,
+            "title": 1
+          },
+          "default_language": "english",
+          "language_override": "language",
+          "textIndexVersion": 3
+        }
+      ],
+      "fieldTypes": {
+        "_id": [
+          "object"
+        ],
+        "__v": [
+          "number"
+        ],
+        "aiTool": [
+          "string"
+        ],
+        "averageRating": [
+          "number"
+        ],
+        "category": [
+          "string"
+        ],
+        "content": [
+          "string"
+        ],
+        "copyCount": [
+          "number"
+        ],
+        "createdAt": [
+          "date"
+        ],
+        "creator": [
+          "object"
+        ],
+        "description": [
+          "string"
+        ],
+        "difficulty": [
+          "string"
+        ],
+        "featured": [
+          "boolean"
+        ],
+        "rejectionFeedback": [
+          "string"
+        ],
+        "reviewCount": [
+          "number"
+        ],
+        "status": [
+          "string"
+        ],
+        "tags": [
+          "array"
+        ],
+        "thumbnailURL": [
+          "string"
+        ],
+        "title": [
+          "string"
+        ],
+        "updatedAt": [
+          "date"
+        ],
+        "usageInstructions": [
+          "string"
+        ],
+        "visibility": [
+          "string"
+        ]
+      },
+      "sampleDocuments": [
+        {
+          "_id": {
+            "buffer": {
+              "0": 106,
+              "1": 54,
+              "2": 136,
+              "3": 110,
+              "4": 40,
+              "5": 160,
+              "6": 108,
+              "7": 139,
+              "8": 169,
+              "9": 70,
+              "10": 148,
+              "11": 52
+            }
+          },
+          "__v": 0,
+          "aiTool": "ChatGPT",
+          "averageRating": 5,
+          "category": "Development",
+          "content": "Act as a senior React engineer. Build a production-ready component for [FEATURE]. Use functional components, clear prop contracts, semantic HTML, keyboard accessibility, responsive behavior, loading and empty states, and error handling. Keep state as local as possible and extract reusable logic only when it improves clarity. Return: 1) component code, 2) any supporting hooks or utilities, 3) example usage, and 4) a short testing checklist. Technology constraints: [FRAMEWORK OR LIBRARIES]. Visual requirements: [DESIGN DETAILS]. Data shape: [INPUT DATA]. Do not invent unavailable APIs or dependencies.",
+          "copyCount": 1,
+          "createdAt": {},
+          "creator": {
+            "buffer": {
+              "0": 106,
+              "1": 54,
+              "2": 136,
+              "3": 106,
+              "4": 40,
+              "5": 160,
+              "6": 108,
+              "7": 139,
+              "8": 169,
+              "9": 70,
+              "10": 148,
+              "11": 51
+            }
+          },
+          "description": "Generate an accessible, responsive React component from a plain-language feature description with clear states and reusable structure.",
+          "difficulty": "Intermediate",
+          "featured": false,
+          "rejectionFeedback": "",
+          "reviewCount": 1,
+          "status": "approved",
+          "tags": [
+            "react",
+            "frontend",
+            "components",
+            "accessibility"
+          ],
+          "thumbnailURL": "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1200&q=80",
+          "title": "Production-Ready React Component Builder",
+          "updatedAt": {},
+          "usageInstructions": "Replace every bracketed value with your feature, stack, design requirements, and data shape. Paste the completed prompt into ChatGPT and verify the generated dependency names before installation.",
+          "visibility": "Private"
+        },
+        {
+          "_id": {
+            "buffer": {
+              "0": 106,
+              "1": 54,
+              "2": 136,
+              "3": 110,
+              "4": 40,
+              "5": 160,
+              "6": 108,
+              "7": 139,
+              "8": 169,
+              "9": 70,
+              "10": 148,
+              "11": 53
+            }
+          },
+          "__v": 0,
+          "aiTool": "Claude",
+          "averageRating": 0,
+          "category": "Marketing",
+          "content": "You are an SEO strategist and subject-matter editor. Create an evidence-conscious content plan for [TOPIC] aimed at [AUDIENCE] in [MARKET]. The primary business goal is [GOAL]. Produce: search intent, one primary keyword theme, supporting topic clusters, reader questions, a differentiated article angle, title options, meta description, detailed H1-H3 outline, recommended examples, conversion points, and internal-link suggestions. Clearly label any claim that requires current research. Avoid keyword stuffing and do not fabricate traffic volumes or competitor data.",
+          "copyCount": 0,
+          "createdAt": {},
+          "creator": {
+            "buffer": {
+              "0": 106,
+              "1": 54,
+              "2": 136,
+              "3": 106,
+              "4": 40,
+              "5": 160,
+              "6": 108,
+              "7": 139,
+              "8": 169,
+              "9": 70,
+              "10": 148,
+              "11": 51
+            }
+          },
+          "description": "Turn a target topic and audience into a practical search-focused content brief, article structure, and internal-linking plan.",
+          "difficulty": "Intermediate",
+          "featured": false,
+          "rejectionFeedback": "",
+          "reviewCount": 0,
+          "status": "approved",
+          "tags": [
+            "seo",
+            "content",
+            "marketing",
+            "strategy"
+          ],
+          "thumbnailURL": "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=1200&q=80",
+          "title": "SEO Content Strategy and Article Planner",
+          "updatedAt": {},
+          "usageInstructions": "Provide the topic, audience, market, and business goal. Use live keyword research tools separately for search volume and competition because the prompt intentionally avoids invented metrics.",
+          "visibility": "private"
+        },
+        {
+          "_id": {
+            "buffer": {
+              "0": 106,
+              "1": 54,
+              "2": 136,
+              "3": 110,
+              "4": 40,
+              "5": 160,
+              "6": 108,
+              "7": 139,
+              "8": 169,
+              "9": 70,
+              "10": 148,
+              "11": 54
+            }
+          },
+          "__v": 0,
+          "aiTool": "Midjourney",
+          "averageRating": 0,
+          "category": "Design",
+          "content": "Act as a digital art director. Design the visual concept for a SaaS landing-page hero promoting [PRODUCT] to [AUDIENCE]. Brand personality: [TRAITS]. Brand colors: [COLORS]. Create a precise image-generation prompt covering composition, focal point, lighting, materials, depth, background treatment, camera perspective, negative space for headline placement, and responsive crop safety. The image must contain no text, logos, watermarks, interface screenshots, or illegible symbols. Also provide a negative prompt and three controlled variations: minimal, energetic, and premium.",
+          "copyCount": 0,
+          "createdAt": {},
+          "creator": {
+            "buffer": {
+              "0": 106,
+              "1": 54,
+              "2": 136,
+              "3": 106,
+              "4": 40,
+              "5": 160,
+              "6": 108,
+              "7": 139,
+              "8": 169,
+              "9": 70,
+              "10": 148,
+              "11": 51
+            }
+          },
+          "description": "Create a detailed visual direction and image-generation prompt for a polished SaaS landing page hero section.",
+          "difficulty": "Pro",
+          "featured": false,
+          "rejectionFeedback": "",
+          "reviewCount": 0,
+          "status": "approved",
+          "tags": [
+            "design",
+            "saas",
+            "hero",
+            "image-generation"
+          ],
+          "thumbnailURL": "https://images.unsplash.com/photo-1558655146-9f40138edfeb?auto=format&fit=crop&w=1200&q=80",
+          "title": "Modern SaaS Landing Page Art Director",
+          "updatedAt": {},
+          "usageInstructions": "Replace the product, audience, brand traits, and colors. Paste the main prompt into your image tool, then use one variation at a time instead of combining all three directions.",
+          "visibility": "public"
+        }
+      ]
+    },
+    {
+      "name": "bookmarks",
+      "documentCount": 1,
+      "indexes": [
+        {
+          "v": 2,
+          "key": {
+            "_id": 1
+          },
+          "name": "_id_"
+        },
+        {
+          "v": 2,
+          "key": {
+            "user": 1,
+            "prompt": 1
+          },
+          "name": "user_1_prompt_1",
+          "unique": true
+        }
+      ],
+      "fieldTypes": {
+        "_id": [
+          "object"
+        ],
+        "__v": [
+          "number"
+        ],
+        "createdAt": [
+          "date"
+        ],
+        "prompt": [
+          "object"
+        ],
+        "updatedAt": [
+          "date"
+        ],
+        "user": [
+          "object"
+        ]
+      },
+      "sampleDocuments": [
+        {
+          "_id": {
+            "buffer": {
+              "0": 106,
+              "1": 54,
+              "2": 145,
+              "3": 16,
+              "4": 142,
+              "5": 236,
+              "6": 12,
+              "7": 221,
+              "8": 76,
+              "9": 106,
+              "10": 190,
+              "11": 4
+            }
+          },
+          "__v": 0,
+          "createdAt": {},
+          "prompt": {
+            "buffer": {
+              "0": 106,
+              "1": 54,
+              "2": 136,
+              "3": 110,
+              "4": 40,
+              "5": 160,
+              "6": 108,
+              "7": 139,
+              "8": 169,
+              "9": 70,
+              "10": 148,
+              "11": 56
+            }
+          },
+          "updatedAt": {},
+          "user": {
+            "buffer": {
+              "0": 106,
+              "1": 54,
+              "2": 136,
+              "3": 106,
+              "4": 40,
+              "5": 160,
+              "6": 108,
+              "7": 139,
+              "8": 169,
+              "9": 70,
+              "10": 148,
+              "11": 51
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "users",
+      "documentCount": 3,
+      "indexes": [
+        {
+          "v": 2,
+          "key": {
+            "_id": 1
+          },
+          "name": "_id_"
+        },
+        {
+          "v": 2,
+          "key": {
+            "email": 1
+          },
+          "name": "email_1",
+          "unique": true
+        },
+        {
+          "v": 2,
+          "key": {
+            "googleSubject": 1
+          },
+          "name": "googleSubject_1",
+          "unique": true,
+          "sparse": true
+        },
+        {
+          "v": 2,
+          "key": {
+            "role": 1
+          },
+          "name": "role_1"
+        }
+      ],
+      "fieldTypes": {
+        "_id": [
+          "object"
+        ],
+        "__v": [
+          "number"
+        ],
+        "createdAt": [
+          "date"
+        ],
+        "email": [
+          "string"
+        ],
+        "name": [
+          "string"
+        ],
+        "passwordHash": [
+          "string"
+        ],
+        "photoURL": [
+          "string"
+        ],
+        "role": [
+          "string"
+        ],
+        "subscription": [
+          "string"
+        ],
+        "updatedAt": [
+          "date"
+        ],
+        "warnings": [
+          "array"
+        ],
+        "googleSubject": [
+          "string"
+        ]
+      },
+      "sampleDocuments": [
+        {
+          "_id": {
+            "buffer": {
+              "0": 106,
+              "1": 54,
+              "2": 136,
+              "3": 106,
+              "4": 40,
+              "5": 160,
+              "6": 108,
+              "7": 139,
+              "8": 169,
+              "9": 70,
+              "10": 148,
+              "11": 51
+            }
+          },
+          "__v": 0,
+          "createdAt": {},
+          "email": "admin@example.com",
+          "name": "PromptGrid Admin",
+          "passwordHash": "HIDDEN",
+          "photoURL": "",
+          "role": "admin",
+          "subscription": "premium",
+          "updatedAt": {},
+          "warnings": [
+            {
+              "reason": "Spam",
+              "report": {
+                "buffer": {
+                  "0": 106,
+                  "1": 54,
+                  "2": 143,
+                  "3": 235,
+                  "4": 142,
+                  "5": 236,
+                  "6": 12,
+                  "7": 221,
+                  "8": 76,
+                  "9": 106,
+                  "10": 189,
+                  "11": 236
+                }
+              },
+              "issuedAt": {},
+              "_id": {
+                "buffer": {
+                  "0": 106,
+                  "1": 54,
+                  "2": 143,
+                  "3": 254,
+                  "4": 142,
+                  "5": 236,
+                  "6": 12,
+                  "7": 221,
+                  "8": 76,
+                  "9": 106,
+                  "10": 189,
+                  "11": 237
+                }
+              }
+            }
+          ]
+        },
+        {
+          "_id": {
+            "buffer": {
+              "0": 106,
+              "1": 56,
+              "2": 82,
+              "3": 127,
+              "4": 67,
+              "5": 77,
+              "6": 97,
+              "7": 225,
+              "8": 174,
+              "9": 116,
+              "10": 209,
+              "11": 161
+            }
+          },
+          "name": "FAHID HASAN 0242310005101323",
+          "email": "fahid23105101323@diu.edu.bd",
+          "photoURL": "https://lh3.googleusercontent.com/a/ACg8ocIvqZmvAP_Ym3drxbRM8ZwVb2sP5lDfg5o16XTcAeg7ftLWBZzA=s96-c",
+          "googleSubject": "102211613737235491618",
+          "role": "user",
+          "subscription": "free",
+          "warnings": [],
+          "createdAt": {},
+          "updatedAt": {},
+          "__v": 0
+        },
+        {
+          "_id": {
+            "buffer": {
+              "0": 106,
+              "1": 56,
+              "2": 224,
+              "3": 168,
+              "4": 233,
+              "5": 144,
+              "6": 179,
+              "7": 49,
+              "8": 105,
+              "9": 85,
+              "10": 203,
+              "11": 216
+            }
+          },
+          "name": "Fahid Hasan",
+          "email": "fahidhasanifty20@gmail.com",
+          "photoURL": "https://lh3.googleusercontent.com/a/ACg8ocJllxNwM3z4Qm95K2iVa_H3ZA8OhcknXm0B8pnt8UDK-PW79Tl0Cw=s96-c",
+          "googleSubject": "104951844397322171663",
+          "role": "creator",
+          "subscription": "free",
+          "warnings": [],
+          "createdAt": {},
+          "updatedAt": {},
+          "__v": 0
+        }
+      ]
+    },
+    {
+      "name": "images.files",
+      "documentCount": 0,
+      "indexes": [
+        {
+          "v": 2,
+          "key": {
+            "_id": 1
+          },
+          "name": "_id_"
+        },
+        {
+          "v": 2,
+          "key": {
+            "filename": 1,
+            "uploadDate": 1
+          },
+          "name": "filename_1_uploadDate_1"
+        }
+      ],
+      "fieldTypes": {},
+      "sampleDocuments": []
+    },
+    {
+      "name": "auditlogs",
+      "documentCount": 9,
+      "indexes": [
+        {
+          "v": 2,
+          "key": {
+            "_id": 1
+          },
+          "name": "_id_"
+        },
+        {
+          "v": 2,
+          "key": {
+            "action": 1
+          },
+          "name": "action_1"
+        },
+        {
+          "v": 2,
+          "key": {
+            "createdAt": -1
+          },
+          "name": "createdAt_-1"
+        }
+      ],
+      "fieldTypes": {
+        "_id": [
+          "object"
+        ],
+        "__v": [
+          "number"
+        ],
+        "action": [
+          "string"
+        ],
+        "actor": [
+          "object"
+        ],
+        "createdAt": [
+          "date"
+        ],
+        "snapshot": [
+          "object"
+        ],
+        "summary": [
+          "string"
+        ],
+        "targetId": [
+          "object"
+        ],
+        "targetType": [
+          "string"
+        ],
+        "updatedAt": [
+          "date"
+        ]
+      },
+      "sampleDocuments": [
+        {
+          "_id": {
+            "buffer": {
+              "0": 106,
+              "1": 54,
+              "2": 234,
+              "3": 189,
+              "4": 39,
+              "5": 206,
+              "6": 139,
+              "7": 102,
+              "8": 0,
+              "9": 163,
+              "10": 130,
+              "11": 22
+            }
+          },
+          "__v": 0,
+          "action": "report_removed",
+          "actor": {
+            "buffer": {
+              "0": 106,
+              "1": 54,
+              "2": 136,
+              "3": 106,
+              "4": 40,
+              "5": 160,
+              "6": 108,
+              "7": 139,
+              "8": 169,
+              "9": 70,
+              "10": 148,
+              "11": 51
+            }
+          },
+          "createdAt": {},
+          "snapshot": {
+            "report": {
+              "_id": {
+                "buffer": {
+                  "0": 106,
+                  "1": 54,
+                  "2": 143,
+                  "3": 235,
+                  "4": 142,
+                  "5": 236,
+                  "6": 12,
+                  "7": 221,
+                  "8": 76,
+                  "9": 106,
+                  "10": 189,
+                  "11": 236
+                }
+              },
+              "prompt": null,
+              "reporter": {
+                "_id": {
+                  "buffer": {
+                    "0": 106,
+                    "1": 54,
+                    "2": 136,
+                    "3": 106,
+                    "4": 40,
+                    "5": 160,
+                    "6": 108,
+                    "7": 139,
+                    "8": 169,
+                    "9": 70,
+                    "10": 148,
+                    "11": 51
+                  }
+                },
+                "name": "PromptGrid Admin",
+                "role": "admin"
+              },
+              "reason": "Spam",
+              "description": "",
+              "status": "removed",
+              "createdAt": {},
+              "updatedAt": {},
+              "__v": 0
+            },
+            "prompt": null
+          },
+          "summary": "removed report for deleted prompt",
+          "targetId": {
+            "buffer": {
+              "0": 106,
+              "1": 54,
+              "2": 143,
+              "3": 235,
+              "4": 142,
+              "5": 236,
+              "6": 12,
+              "7": 221,
+              "8": 76,
+              "9": 106,
+              "10": 189,
+              "11": 236
+            }
+          },
+          "targetType": "report",
+          "updatedAt": {}
+        },
+        {
+          "_id": {
+            "buffer": {
+              "0": 106,
+              "1": 56,
+              "2": 84,
+              "3": 250,
+              "4": 67,
+              "5": 77,
+              "6": 97,
+              "7": 225,
+              "8": 174,
+              "9": 116,
+              "10": 209,
+              "11": 178
+            }
+          },
+          "actor": {
+            "buffer": {
+              "0": 106,
+              "1": 54,
+              "2": 136,
+              "3": 106,
+              "4": 40,
+              "5": 160,
+              "6": 108,
+              "7": 139,
+              "8": 169,
+              "9": 70,
+              "10": 148,
+              "11": 51
+            }
+          },
+          "action": "prompt_approve",
+          "targetType": "prompt",
+          "targetId": {
+            "buffer": {
+              "0": 106,
+              "1": 54,
+              "2": 136,
+              "3": 110,
+              "4": 40,
+              "5": 160,
+              "6": 108,
+              "7": 139,
+              "8": 169,
+              "9": 70,
+              "10": 148,
+              "11": 54
+            }
+          },
+          "summary": "approve prompt: Modern SaaS Landing Page Art Director",
+          "snapshot": {
+            "before": {
+              "_id": {
+                "buffer": {
+                  "0": 106,
+                  "1": 54,
+                  "2": 136,
+                  "3": 110,
+                  "4": 40,
+                  "5": 160,
+                  "6": 108,
+                  "7": 139,
+                  "8": 169,
+                  "9": 70,
+                  "10": 148,
+                  "11": 54
+                }
+              },
+              "__v": 0,
+              "aiTool": "Midjourney",
+              "averageRating": 0,
+              "category": "Design",
+              "content": "Act as a digital art director. Design the visual concept for a SaaS landing-page hero promoting [PRODUCT] to [AUDIENCE]. Brand personality: [TRAITS]. Brand colors: [COLORS]. Create a precise image-generation prompt covering composition, focal point, lighting, materials, depth, background treatment, camera perspective, negative space for headline placement, and responsive crop safety. The image must contain no text, logos, watermarks, interface screenshots, or illegible symbols. Also provide a negative prompt and three controlled variations: minimal, energetic, and premium.",
+              "copyCount": 0,
+              "createdAt": {},
+              "creator": {
+                "buffer": {
+                  "0": 106,
+                  "1": 54,
+                  "2": 136,
+                  "3": 106,
+                  "4": 40,
+                  "5": 160,
+                  "6": 108,
+                  "7": 139,
+                  "8": 169,
+                  "9": 70,
+                  "10": 148,
+                  "11": 51
+                }
+              },
+              "description": "Create a detailed visual direction and image-generation prompt for a polished SaaS landing page hero section.",
+              "difficulty": "Pro",
+              "featured": false,
+              "rejectionFeedback": "",
+              "reviewCount": 0,
+              "status": "approved",
+              "tags": [
+                "design",
+                "saas",
+                "hero",
+                "image-generation"
+              ],
+              "thumbnailURL": "https://images.unsplash.com/photo-1558655146-9f40138edfeb?auto=format&fit=crop&w=1200&q=80",
+              "title": "Modern SaaS Landing Page Art Director",
+              "updatedAt": {},
+              "usageInstructions": "Replace the product, audience, brand traits, and colors. Paste the main prompt into your image tool, then use one variation at a time instead of combining all three directions.",
+              "visibility": "public"
+            },
+            "after": {
+              "_id": {
+                "buffer": {
+                  "0": 106,
+                  "1": 54,
+                  "2": 136,
+                  "3": 110,
+                  "4": 40,
+                  "5": 160,
+                  "6": 108,
+                  "7": 139,
+                  "8": 169,
+                  "9": 70,
+                  "10": 148,
+                  "11": 54
+                }
+              },
+              "__v": 0,
+              "aiTool": "Midjourney",
+              "averageRating": 0,
+              "category": "Design",
+              "content": "Act as a digital art director. Design the visual concept for a SaaS landing-page hero promoting [PRODUCT] to [AUDIENCE]. Brand personality: [TRAITS]. Brand colors: [COLORS]. Create a precise image-generation prompt covering composition, focal point, lighting, materials, depth, background treatment, camera perspective, negative space for headline placement, and responsive crop safety. The image must contain no text, logos, watermarks, interface screenshots, or illegible symbols. Also provide a negative prompt and three controlled variations: minimal, energetic, and premium.",
+              "copyCount": 0,
+              "createdAt": {},
+              "creator": {
+                "buffer": {
+                  "0": 106,
+                  "1": 54,
+                  "2": 136,
+                  "3": 106,
+                  "4": 40,
+                  "5": 160,
+                  "6": 108,
+                  "7": 139,
+                  "8": 169,
+                  "9": 70,
+                  "10": 148,
+                  "11": 51
+                }
+              },
+              "description": "Create a detailed visual direction and image-generation prompt for a polished SaaS landing page hero section.",
+              "difficulty": "Pro",
+              "featured": false,
+              "rejectionFeedback": "",
+              "reviewCount": 0,
+              "status": "approved",
+              "tags": [
+                "design",
+                "saas",
+                "hero",
+                "image-generation"
+              ],
+              "thumbnailURL": "https://images.unsplash.com/photo-1558655146-9f40138edfeb?auto=format&fit=crop&w=1200&q=80",
+              "title": "Modern SaaS Landing Page Art Director",
+              "updatedAt": {},
+              "usageInstructions": "Replace the product, audience, brand traits, and colors. Paste the main prompt into your image tool, then use one variation at a time instead of combining all three directions.",
+              "visibility": "public"
+            },
+            "feedback": ""
+          },
+          "createdAt": {},
+          "updatedAt": {},
+          "__v": 0
+        },
+        {
+          "_id": {
+            "buffer": {
+              "0": 106,
+              "1": 56,
+              "2": 84,
+              "3": 251,
+              "4": 67,
+              "5": 77,
+              "6": 97,
+              "7": 225,
+              "8": 174,
+              "9": 116,
+              "10": 209,
+              "11": 181
+            }
+          },
+          "actor": {
+            "buffer": {
+              "0": 106,
+              "1": 54,
+              "2": 136,
+              "3": 106,
+              "4": 40,
+              "5": 160,
+              "6": 108,
+              "7": 139,
+              "8": 169,
+              "9": 70,
+              "10": 148,
+              "11": 51
+            }
+          },
+          "action": "prompt_approve",
+          "targetType": "prompt",
+          "targetId": {
+            "buffer": {
+              "0": 106,
+              "1": 54,
+              "2": 136,
+              "3": 110,
+              "4": 40,
+              "5": 160,
+              "6": 108,
+              "7": 139,
+              "8": 169,
+              "9": 70,
+              "10": 148,
+              "11": 54
+            }
+          },
+          "summary": "approve prompt: Modern SaaS Landing Page Art Director",
+          "snapshot": {
+            "before": {
+              "_id": {
+                "buffer": {
+                  "0": 106,
+                  "1": 54,
+                  "2": 136,
+                  "3": 110,
+                  "4": 40,
+                  "5": 160,
+                  "6": 108,
+                  "7": 139,
+                  "8": 169,
+                  "9": 70,
+                  "10": 148,
+                  "11": 54
+                }
+              },
+              "__v": 0,
+              "aiTool": "Midjourney",
+              "averageRating": 0,
+              "category": "Design",
+              "content": "Act as a digital art director. Design the visual concept for a SaaS landing-page hero promoting [PRODUCT] to [AUDIENCE]. Brand personality: [TRAITS]. Brand colors: [COLORS]. Create a precise image-generation prompt covering composition, focal point, lighting, materials, depth, background treatment, camera perspective, negative space for headline placement, and responsive crop safety. The image must contain no text, logos, watermarks, interface screenshots, or illegible symbols. Also provide a negative prompt and three controlled variations: minimal, energetic, and premium.",
+              "copyCount": 0,
+              "createdAt": {},
+              "creator": {
+                "buffer": {
+                  "0": 106,
+                  "1": 54,
+                  "2": 136,
+                  "3": 106,
+                  "4": 40,
+                  "5": 160,
+                  "6": 108,
+                  "7": 139,
+                  "8": 169,
+                  "9": 70,
+                  "10": 148,
+                  "11": 51
+                }
+              },
+              "description": "Create a detailed visual direction and image-generation prompt for a polished SaaS landing page hero section.",
+              "difficulty": "Pro",
+              "featured": false,
+              "rejectionFeedback": "",
+              "reviewCount": 0,
+              "status": "approved",
+              "tags": [
+                "design",
+                "saas",
+                "hero",
+                "image-generation"
+              ],
+              "thumbnailURL": "https://images.unsplash.com/photo-1558655146-9f40138edfeb?auto=format&fit=crop&w=1200&q=80",
+              "title": "Modern SaaS Landing Page Art Director",
+              "updatedAt": {},
+              "usageInstructions": "Replace the product, audience, brand traits, and colors. Paste the main prompt into your image tool, then use one variation at a time instead of combining all three directions.",
+              "visibility": "public"
+            },
+            "after": {
+              "_id": {
+                "buffer": {
+                  "0": 106,
+                  "1": 54,
+                  "2": 136,
+                  "3": 110,
+                  "4": 40,
+                  "5": 160,
+                  "6": 108,
+                  "7": 139,
+                  "8": 169,
+                  "9": 70,
+                  "10": 148,
+                  "11": 54
+                }
+              },
+              "__v": 0,
+              "aiTool": "Midjourney",
+              "averageRating": 0,
+              "category": "Design",
+              "content": "Act as a digital art director. Design the visual concept for a SaaS landing-page hero promoting [PRODUCT] to [AUDIENCE]. Brand personality: [TRAITS]. Brand colors: [COLORS]. Create a precise image-generation prompt covering composition, focal point, lighting, materials, depth, background treatment, camera perspective, negative space for headline placement, and responsive crop safety. The image must contain no text, logos, watermarks, interface screenshots, or illegible symbols. Also provide a negative prompt and three controlled variations: minimal, energetic, and premium.",
+              "copyCount": 0,
+              "createdAt": {},
+              "creator": {
+                "buffer": {
+                  "0": 106,
+                  "1": 54,
+                  "2": 136,
+                  "3": 106,
+                  "4": 40,
+                  "5": 160,
+                  "6": 108,
+                  "7": 139,
+                  "8": 169,
+                  "9": 70,
+                  "10": 148,
+                  "11": 51
+                }
+              },
+              "description": "Create a detailed visual direction and image-generation prompt for a polished SaaS landing page hero section.",
+              "difficulty": "Pro",
+              "featured": false,
+              "rejectionFeedback": "",
+              "reviewCount": 0,
+              "status": "approved",
+              "tags": [
+                "design",
+                "saas",
+                "hero",
+                "image-generation"
+              ],
+              "thumbnailURL": "https://images.unsplash.com/photo-1558655146-9f40138edfeb?auto=format&fit=crop&w=1200&q=80",
+              "title": "Modern SaaS Landing Page Art Director",
+              "updatedAt": {},
+              "usageInstructions": "Replace the product, audience, brand traits, and colors. Paste the main prompt into your image tool, then use one variation at a time instead of combining all three directions.",
+              "visibility": "public"
+            },
+            "feedback": ""
+          },
+          "createdAt": {},
+          "updatedAt": {},
+          "__v": 0
+        }
+      ]
+    },
+    {
+      "name": "payments",
+      "documentCount": 0,
+      "indexes": [
+        {
+          "v": 2,
+          "key": {
+            "_id": 1
+          },
+          "name": "_id_"
+        },
+        {
+          "v": 2,
+          "key": {
+            "stripeSessionId": 1
+          },
+          "name": "stripeSessionId_1",
+          "unique": true
+        }
+      ],
+      "fieldTypes": {},
+      "sampleDocuments": []
+    },
+    {
+      "name": "images.chunks",
+      "documentCount": 0,
+      "indexes": [
+        {
+          "v": 2,
+          "key": {
+            "_id": 1
+          },
+          "name": "_id_"
+        },
+        {
+          "v": 2,
+          "key": {
+            "files_id": 1,
+            "n": 1
+          },
+          "name": "files_id_1_n_1",
+          "unique": true
+        }
+      ],
+      "fieldTypes": {},
+      "sampleDocuments": []
+    },
+    {
+      "name": "sessions",
+      "documentCount": 58,
+      "indexes": [
+        {
+          "v": 2,
+          "key": {
+            "_id": 1
+          },
+          "name": "_id_"
+        },
+        {
+          "v": 2,
+          "key": {
+            "user": 1
+          },
+          "name": "user_1"
+        },
+        {
+          "v": 2,
+          "key": {
+            "tokenHash": 1
+          },
+          "name": "tokenHash_1",
+          "unique": true
+        },
+        {
+          "v": 2,
+          "key": {
+            "familyId": 1
+          },
+          "name": "familyId_1"
+        },
+        {
+          "v": 2,
+          "key": {
+            "expiresAt": 1
+          },
+          "name": "expiresAt_1",
+          "expireAfterSeconds": 0
+        }
+      ],
+      "fieldTypes": {
+        "_id": [
+          "object"
+        ],
+        "__v": [
+          "number"
+        ],
+        "createdAt": [
+          "date"
+        ],
+        "expiresAt": [
+          "date"
+        ],
+        "familyId": [
+          "string"
+        ],
+        "tokenHash": [
+          "string"
+        ],
+        "updatedAt": [
+          "date"
+        ],
+        "user": [
+          "object"
+        ],
+        "replacedByTokenHash": [
+          "string"
+        ],
+        "revokedAt": [
+          "date"
+        ]
+      },
+      "sampleDocuments": [
+        {
+          "_id": {
+            "buffer": {
+              "0": 106,
+              "1": 54,
+              "2": 136,
+              "3": 175,
+              "4": 142,
+              "5": 236,
+              "6": 12,
+              "7": 221,
+              "8": 76,
+              "9": 106,
+              "10": 189,
+              "11": 230
+            }
+          },
+          "__v": 0,
+          "createdAt": {},
+          "expiresAt": {},
+          "familyId": "e298346d-c00a-4126-bd2e-2838516d9918",
+          "tokenHash": "HIDDEN",
+          "updatedAt": {},
+          "user": {
+            "buffer": {
+              "0": 106,
+              "1": 54,
+              "2": 136,
+              "3": 106,
+              "4": 40,
+              "5": 160,
+              "6": 108,
+              "7": 139,
+              "8": 169,
+              "9": 70,
+              "10": 148,
+              "11": 51
+            }
+          }
+        },
+        {
+          "_id": {
+            "buffer": {
+              "0": 106,
+              "1": 54,
+              "2": 139,
+              "3": 83,
+              "4": 142,
+              "5": 236,
+              "6": 12,
+              "7": 221,
+              "8": 76,
+              "9": 106,
+              "10": 189,
+              "11": 231
+            }
+          },
+          "__v": 0,
+          "createdAt": {},
+          "expiresAt": {},
+          "familyId": "cea5b5a8-8774-4ffc-ad49-70134489898d",
+          "replacedByTokenHash": "HIDDEN",
+          "revokedAt": {},
+          "tokenHash": "HIDDEN",
+          "updatedAt": {},
+          "user": {
+            "buffer": {
+              "0": 106,
+              "1": 54,
+              "2": 136,
+              "3": 106,
+              "4": 40,
+              "5": 160,
+              "6": 108,
+              "7": 139,
+              "8": 169,
+              "9": 70,
+              "10": 148,
+              "11": 51
+            }
+          }
+        },
+        {
+          "_id": {
+            "buffer": {
+              "0": 106,
+              "1": 54,
+              "2": 142,
+              "3": 202,
+              "4": 142,
+              "5": 236,
+              "6": 12,
+              "7": 221,
+              "8": 76,
+              "9": 106,
+              "10": 189,
+              "11": 232
+            }
+          },
+          "__v": 0,
+          "createdAt": {},
+          "expiresAt": {},
+          "familyId": "4d1d3474-5552-415f-8b52-d0aee4b4ed1b",
+          "tokenHash": "HIDDEN",
+          "updatedAt": {},
+          "user": {
+            "buffer": {
+              "0": 106,
+              "1": 54,
+              "2": 136,
+              "3": 106,
+              "4": 40,
+              "5": 160,
+              "6": 108,
+              "7": 139,
+              "8": 169,
+              "9": 70,
+              "10": 148,
+              "11": 51
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
