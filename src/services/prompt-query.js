@@ -12,14 +12,14 @@ export function normalizePagination({ page = 1, limit = 6 } = {}) {
 }
 
 export function buildPromptQuery({ search, category, tool, difficulty, visibility } = {}) {
-  const query = { status: 'approved', visibility: 'public' };
-
-  if (visibility === 'private') {
-    query.visibility = 'private';
-  }
+  const query = { status: 'approved' };
 
   if (visibility === 'public') {
     query.visibility = 'public';
+  }
+
+  if (visibility === 'private') {
+    query.visibility = 'private';
   }
 
   if (category) query.category = category;
