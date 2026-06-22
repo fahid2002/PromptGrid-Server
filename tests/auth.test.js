@@ -15,9 +15,9 @@ describe('authentication defaults', () => {
   });
 
   it('requires an explicit Google register or login intent', () => {
-    expect(googleSchema.parse({ credential: 'token', intent: 'register', role: 'creator' })).toMatchObject({ intent: 'register', role: 'creator' });
-    expect(googleSchema.parse({ credential: 'token', intent: 'login' })).toMatchObject({ intent: 'login', role: 'user' });
-    expect(() => googleSchema.parse({ credential: 'token', intent: 'admin', role: 'admin' })).toThrow();
+    expect(googleSchema.parse({ accessToken: 'token', intent: 'register', role: 'creator' })).toMatchObject({ intent: 'register', role: 'creator' });
+    expect(googleSchema.parse({ accessToken: 'token', intent: 'login' })).toMatchObject({ intent: 'login', role: 'user' });
+    expect(() => googleSchema.parse({ accessToken: 'token', intent: 'admin', role: 'admin' })).toThrow();
   });
 
   it('requires a selected login role including admin', () => {
