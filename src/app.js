@@ -86,6 +86,15 @@ app.use('/api/uploads', uploadRoutes);
 app.use('/api/images', imageRoutes);
 app.use('/api/notifications', notificationRoutes);
 
+// Root route
+app.get('/', (_request, response) =>
+  response.json({
+    message: 'PromptGrid API is running',
+    health: '/api/health',
+    docs: 'Use /api/prompts, /api/auth, /api/payments, /api/dashboard',
+  })
+);
+
 // Health check route
 app.get('/api/health', (_request, response) =>
   response.json({
