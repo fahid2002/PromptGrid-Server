@@ -1,48 +1,274 @@
 # PromptGrid Server
 
-Express/Mongoose API for the AI Prompt Sharing & Marketplace Platform.
+Backend API for **PromptGrid**, an AI Prompt Sharing & Marketplace Platform where users can browse prompts, create prompts, save prompts, review prompts, report prompts, and unlock premium prompt content through Stripe Checkout.
 
-**Live URL:** Add the Render production URL here after deployment.
+## Live Links
 
-## Security and behavior
+* **Server API:** https://promptgrid-server-fahid2002.onrender.com
+* **Health Check:** https://promptgrid-server-fahid2002.onrender.com/api/health
+* **Client App:** https://promptgrid-client.vercel.app
 
-- Passwords hashed with bcrypt (cost 12)
-- JWT stored in secure HTTP-only cookies; bearer fallback supported
-- User/Creator/Admin role middleware
-- Zod request validation, Helmet, CORS and auth rate limiting
-- MongoDB indexes for search and duplicate bookmark/review prevention
-- Private prompt content redacted by the server for free accounts
-- Stripe webhook signature verification and idempotent payment records
-- Cloudinary memory uploads; no local production file persistence
+## Features
 
-## Run locally
+* Email/password authentication
+* Google OAuth login
+* JWT authentication with secure cookies
+* User, creator, and admin role management
+* Public and premium/private prompt system
+* Premium prompt locking for free users
+* Prompt create, update, delete, copy, bookmark, review, and report APIs
+* Admin dashboard APIs for users, prompts, reports, payments, and analytics
+* Stripe Checkout payment integration
+* Stripe webhook verification for successful payments
+* Automatic user upgrade to premium after successful payment
+* Admin notification system for important platform events
+* GridFS image upload support
+* MongoDB database with Mongoose
+* Security middleware using Helmet, CORS, rate limiting, and cookie parser
+* Automated test coverage with Vitest
 
-1. Copy `.env.example` to `.env` and provide real credentials.
-2. Run `npm install`, `npm test`, then `npm run dev`.
-3. The health endpoint is `GET /api/health`.
+## Tech Stack
 
-Use `npm run dev:memory` for a credential-free temporary MongoDB server during local UI testing. Data disappears when that process stops.
+* Node.js
+* Express.js
+* MongoDB
+* Mongoose
+* JWT
+* bcrypt
+* Google OAuth
+* Stripe Checkout
+* GridFS
+* Helmet
+* CORS
+* Vitest
+* Render
 
-## Main packages
+## Project Structure
 
-Express, Mongoose, Zod, JWT, bcrypt, Stripe, Cloudinary, Google Auth Library, Helmet, CORS, Multer, Supertest, Vitest and MongoDB Memory Server.
+```txt
+promptgrid-server/
+├── src/
+│   ├── config/
+│   ├── controllers/
+│   ├── middleware/
+│   ├── models/
+│   ├── routes/
+│   ├── services/
+│   ├── utils/
+│   ├── app.js
+│   └── index.js
+├── scripts/
+├── tests/
+├── package.json
+├── render.yaml
+└── README.md
+```
 
-## API areas
+## Environment Variables
 
-- `/api/auth`: registration, login, Google login, session restoration and logout
-- `/api/prompts`: home aggregation, featured limit(6), backend search/filter/sort/pagination, details and interactions
-- `/api/dashboard`: user, creator and role-protected admin operations
-- `/api/payments`: Stripe Checkout, session verification and signed webhook fulfillment
-- `/api/uploads`: authenticated Cloudinary image uploads
+Create a `.env` file in the root of the server project.
 
-## Stripe
+```env
+NODE_ENV=development
+PORT=5000
 
-Create a webhook endpoint at `https://YOUR_RENDER_DOMAIN/api/payments/webhook` for `checkout.session.completed` and `checkout.session.async_payment_succeeded`. Copy its signing secret to `STRIPE_WEBHOOK_SECRET`. Premium is never granted from the redirect alone; the server retrieves the Checkout Session and requires `payment_status=paid`.
+MONGODB_URI=your_mongodb_connection_string
+MONGODB_DB=promptgrid
 
-## Render
+JWT_SECRET=your_secure_jwt_secret
+CLIENT_URL=http://localhost:3000
 
-Create a Web Service from this directory or use `render.yaml`. Add every `.env.example` key in Render's environment settings. Set `CLIENT_URL` to the exact Vercel production origin. MongoDB Atlas network access must allow Render connections.
+GOOGLE_CLIENT_ID=your_google_client_id
+GOOGLE_PROJECT_ID=your_google_project_id
+GOOGLE_PROJECT_NUMBER=your_google_project_number
 
-No seed script is included: all counts, ratings, users, prompts and payments originate from real MongoDB records.
+STRIPE_SECRET_KEY=sk_test_your_stripe_secret_key
+STRIPE_WEBHOOK_SECRET=whsec_your_stripe_webhook_secret
 
-After deployment, replace this README's Live URL, test `/api/health`, register a real account, promote the first admin directly in MongoDB Atlas, then test moderation and Stripe in test mode before enabling live Stripe keys.
+ADMIN_NAME=PromptGrid Admin
+ADMIN_EMAIL=admin@example.com
+ADMIN_PASSWORD=your_admin_password
+```
+
+For production on Render, set these values in the Render environment settings:
+
+```env
+NODE_ENV=production
+PORT=5000
+
+MONGODB_URI=your_mongodb_connection_string
+MONGODB_DB=promptgrid
+
+JWT_SECRET=your_secure_jwt_secret
+CLIENT_URL=https://promptgrid-client.vercel.app
+
+GOOGLE_CLIENT_ID=your_google_client_id
+GOOGLE_PROJECT_ID=your_google_project_id
+GOOGLE_PROJECT_NUMBER=your_google_project_number
+
+STRIPE_SECRET_KEY=sk_test_your_stripe_secret_key
+STRIPE_WEBHOOK_SECRET=whsec_your_stripe_webhook_secret
+
+ADMIN_NAME=PromptGrid Admin
+ADMIN_EMAIL=admin@example.com
+ADMIN_PASSWORD=your_admin_password
+```
+
+Never commit real `.env` secrets to GitHub. Keep real MongoDB, JWT, Google, Stripe, and admin credentials only in local `.env` files or deployment environment variables.
+
+## Installation
+
+```bash
+npm install
+```
+
+## Run Locally
+
+```bash
+npm run dev
+```
+
+The server will run on:
+
+```txt
+http://localhost:5000
+```
+
+Health check:
+
+```txt
+http://localhost:5000/api/health
+```
+
+## Run Tests
+
+```bash
+npm run test
+```
+
+## Database Scripts
+
+Seed the admin user:
+
+```bash
+npm run seed:admin
+```
+
+Seed starter prompts:
+
+```bash
+npm run seed:prompts
+```
+
+Migrate data from an old database if needed:
+
+```bash
+npm run migrate:database
+```
+
+## Stripe Setup
+
+PromptGrid uses Stripe Checkout for premium access payment.
+
+Required server environment variables:
+
+```env
+STRIPE_SECRET_KEY=sk_test_...
+STRIPE_WEBHOOK_SECRET=whsec_...
+```
+
+Stripe webhook endpoint:
+
+```txt
+https://promptgrid-server-fahid2002.onrender.com/api/payments/webhook
+```
+
+Required webhook events:
+
+```txt
+checkout.session.completed
+checkout.session.async_payment_succeeded
+```
+
+After a successful payment:
+
+* A payment record is saved in MongoDB
+* The user subscription is upgraded to `premium`
+* Premium/private prompt content becomes unlocked
+* Admin receives a premium subscription notification
+
+## Main API Routes
+
+```txt
+GET    /api/health
+
+POST   /api/auth/register
+POST   /api/auth/login
+POST   /api/auth/google
+POST   /api/auth/logout
+
+GET    /api/prompts
+GET    /api/prompts/home
+GET    /api/prompts/:id
+POST   /api/prompts
+PATCH  /api/prompts/:id
+DELETE /api/prompts/:id
+POST   /api/prompts/:id/copy
+PUT    /api/prompts/:id/bookmark
+POST   /api/prompts/:id/reviews
+DELETE /api/prompts/:id/reviews
+POST   /api/prompts/:id/report
+
+POST   /api/payments/checkout
+GET    /api/payments/session/:sessionId
+POST   /api/payments/webhook
+
+GET    /api/dashboard
+GET    /api/dashboard/admin/users
+GET    /api/dashboard/admin/prompts
+GET    /api/dashboard/admin/reports
+GET    /api/dashboard/admin/payments
+
+GET    /api/notifications
+GET    /api/notifications/unread-count
+PATCH  /api/notifications/:id/read
+```
+
+## Deployment
+
+The server is deployed on Render.
+
+Recommended Render settings:
+
+```txt
+Build Command: npm install
+Start Command: npm start
+Health Check Path: /api/health
+```
+
+After changing environment variables, redeploy the Render service.
+
+## Testing Checklist
+
+Before final submission, verify:
+
+* Server health endpoint works
+* User registration works
+* Email/password login works
+* Google login works
+* Public prompts load
+* Premium prompts appear as locked cards for free users
+* Prompt creation works
+* Admin can approve/reject prompts
+* Stripe test payment works
+* User becomes premium after payment
+* Payment record is saved in MongoDB
+* Admin receives notification after premium payment
+
+## Author
+
+Developed by **Fahid Hasan**.
+
+## License
+
+This project is for educational and portfolio purposes.
