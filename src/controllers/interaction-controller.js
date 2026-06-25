@@ -142,6 +142,7 @@ export async function review(request, response) {
 }
 
 // Reports a prompt to the admin team
+// Reports a prompt to the admin team
 export async function report(request, response) {
   const input = z
     .object({
@@ -150,7 +151,6 @@ export async function report(request, response) {
         'Spam',
         'Copyright Violation',
       ]),
-
       description: z
         .string()
         .max(1200)
@@ -161,17 +161,27 @@ export async function report(request, response) {
 
   const prompt = await Prompt
     .findById(request.params.id)
-    .select('title creator');
+    .select('title description category aiTool difficulty visibility creator');
 
   if (!prompt) {
     throw new AppError(404, 'Prompt not found');
   }
 
-  // Save report record
+  // Save report record with prompt snapshot
+  // This keeps the original prompt title/details even if the prompt is deleted later.
   const saved = await Report.create({
     ...input,
-    prompt: request.params.id,
+    prompt: prompt._id,
     reporter: request.user._id,
+    promptSnapshot: {
+      title: prompt.title,
+      description: prompt.description,
+      category: prompt.category,
+      aiTool: prompt.aiTool,
+      difficulty: prompt.difficulty,
+      visibility: prompt.visibility,
+      creator: prompt.creator,
+    },
   });
 
   // Notify admins and record audit log
@@ -180,7 +190,7 @@ export async function report(request, response) {
       type: 'prompt_reported',
       title: 'Prompt reported',
       message: `“${prompt.title}” was reported for ${saved.reason}.`,
-      href: '/dashboard?view=admin-reports',
+      href: '/dashboard/admin/reports',
       relatedPrompt: prompt._id,
       relatedReport: saved._id,
       eventKey: `report:${saved._id}`,

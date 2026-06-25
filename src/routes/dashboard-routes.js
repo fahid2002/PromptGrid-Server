@@ -5,6 +5,7 @@ import {
   allUsers,
   auditHistory,
   creatorAnalytics,
+  deleteReport,
   deleteUser,
   myBookmarks,
   myDashboard,
@@ -60,6 +61,11 @@ router.patch(
   '/admin/users/:id/role',
   requireRole('admin'),
   asyncHandler(updateRole)
+);
+router.delete(
+  '/admin/reports/:id',
+  requireRole('admin'),
+  asyncHandler(deleteReport)
 );
 
 router.delete(

@@ -43,6 +43,38 @@ const schema = new mongoose.Schema(
       default: 'pending',
       index: true,
     },
+
+    // Keeps original prompt information even if the prompt is removed later
+    promptSnapshot: {
+      title: {
+        type: String,
+        default: '',
+      },
+      description: {
+        type: String,
+        default: '',
+      },
+      category: {
+        type: String,
+        default: '',
+      },
+      aiTool: {
+        type: String,
+        default: '',
+      },
+      difficulty: {
+        type: String,
+        default: '',
+      },
+      visibility: {
+        type: String,
+        default: '',
+      },
+      creator: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+      },
+    },
   },
   {
     timestamps: true,

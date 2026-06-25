@@ -565,6 +565,7 @@ export async function payments(_request, response) {
 }
 
 // Returns all report records for admin
+// Returns all report records for admin
 export async function reports(_request, response) {
   response.json({
     reports: await Report
@@ -572,11 +573,15 @@ export async function reports(_request, response) {
       .sort({
         createdAt: -1,
       })
-      .populate('prompt', 'title creator')
+      .populate(
+        'prompt',
+        'title description category aiTool difficulty visibility creator'
+      )
       .populate('reporter', 'name email'),
   });
 }
 
+// Performs action on a submitted report
 // Performs action on a submitted report
 export async function reportAction(request, response) {
   const status = z
@@ -588,15 +593,7 @@ export async function reportAction(request, response) {
     .parse(request.body.status);
 
   const report = await Report
-    .findByIdAndUpdate(
-      request.params.id,
-      {
-        status,
-      },
-      {
-        returnDocument: 'after',
-      }
-    )
+    .findById(request.params.id)
     .populate('prompt')
     .populate('reporter', 'name role');
 
@@ -604,7 +601,31 @@ export async function reportAction(request, response) {
     throw new AppError(404, 'Report not found');
   }
 
-  const promptSnapshot = report.prompt?.toObject();
+  const promptSnapshot = report.prompt
+    ? {
+        title: report.prompt.title,
+        description: report.prompt.description,
+        category: report.prompt.category,
+        aiTool: report.prompt.aiTool,
+        difficulty: report.prompt.difficulty,
+        visibility: report.prompt.visibility,
+        creator: report.prompt.creator,
+      }
+    : report.promptSnapshot || {};
+
+  report.status = status;
+
+  // Save prompt information before removing the actual prompt
+  if (report.prompt && !report.promptSnapshot?.title) {
+    report.promptSnapshot = promptSnapshot;
+  }
+
+  await report.save();
+
+  const promptTitle =
+    promptSnapshot?.title ||
+    report.prompt?.title ||
+    'reported prompt';
 
   const jobs = [
     recordAudit({
@@ -612,10 +633,10 @@ export async function reportAction(request, response) {
       action: `report_${status}`,
       targetType: 'report',
       targetId: report._id,
-      summary: `${status} report for ${report.prompt?.title || 'deleted prompt'}`,
+      summary: `${status} report for ${promptTitle}`,
       snapshot: {
         report: report.toObject(),
-        prompt: promptSnapshot || null,
+        prompt: report.prompt?.toObject?.() || promptSnapshot || null,
       },
     }),
   ];
@@ -624,18 +645,21 @@ export async function reportAction(request, response) {
   if (status === 'removed' && report.prompt) {
     jobs.push(
       Prompt.findByIdAndDelete(report.prompt._id),
+
       Bookmark.deleteMany({
         prompt: report.prompt._id,
       }),
+
       Review.deleteMany({
         prompt: report.prompt._id,
       }),
+
       notify({
         recipient: report.prompt.creator,
         recipientRole: 'creator',
         type: 'prompt_removed',
         title: 'Prompt removed',
-        message: `“${report.prompt.title}” was removed after a report.`,
+        message: `Your prompt “${report.prompt.title}” was removed after a report for ${report.reason}.`,
         href: '/dashboard?view=my-prompts',
         relatedReport: report._id,
         eventKey: `report_action:${report._id}:removed:creator`,
@@ -645,6 +669,10 @@ export async function reportAction(request, response) {
 
   // Warn creator if report action is warned
   if (status === 'warned' && report.prompt) {
+    const warningMessage = report.description
+      ? `Your prompt “${report.prompt.title}” received a warning for ${report.reason}. Admin note: ${report.description}. Please update the prompt to follow platform guidelines or delete it from your dashboard.`
+      : `Your prompt “${report.prompt.title}” received a warning for ${report.reason}. Please update the prompt to follow platform guidelines or delete it from your dashboard.`;
+
     jobs.push(
       User.findByIdAndUpdate(
         report.prompt.creator,
@@ -658,12 +686,13 @@ export async function reportAction(request, response) {
           },
         }
       ),
+
       notify({
         recipient: report.prompt.creator,
         recipientRole: 'creator',
         type: 'admin_warning',
         title: 'Warning from administrator',
-        message: `Please review “${report.prompt.title}”: ${report.reason}.`,
+        message: warningMessage,
         href: '/dashboard?view=my-prompts',
         relatedPrompt: report.prompt._id,
         relatedReport: report._id,
@@ -693,6 +722,31 @@ export async function reportAction(request, response) {
   response.json({
     report,
   });
+}
+// Removes a report from the reported prompts page without deleting the prompt
+export async function deleteReport(request, response) {
+  const report = await Report.findById(request.params.id);
+
+  if (!report) {
+    throw new AppError(404, 'Report not found');
+  }
+
+  await Promise.all([
+    recordAudit({
+      actor: request.user._id,
+      action: 'report_deleted',
+      targetType: 'report',
+      targetId: report._id,
+      summary: `Removed report from admin list: ${
+        report.promptSnapshot?.title || 'reported prompt'
+      }`,
+      snapshot: report.toObject(),
+    }),
+
+    report.deleteOne(),
+  ]);
+
+  response.status(204).end();
 }
 
 // Returns audit log history for admin
