@@ -5,7 +5,11 @@ import Review from '../models/Review.js';
 import Report from '../models/Report.js';
 import User from '../models/User.js';
 import { recordAudit } from '../services/audit-service.js';
-import { notifyAdmins } from '../services/notification-service.js';
+import {
+  notify,
+  notifyAdmins,
+} from '../services/notification-service.js';
+import { recordUserActivity } from '../services/user-activity-service.js';
 import {
   canAccessPromptContent,
   canManagePrompt,
@@ -96,7 +100,7 @@ export async function featured(_request, response) {
   });
 }
 
-// Returns approved public prompts with filters and pagination
+// Returns approved prompts with filters and pagination
 export async function listPublic(request, response) {
   const pagination = normalizePagination(request.query);
 
@@ -209,7 +213,7 @@ export async function create(request, response) {
     featured: false,
   });
 
-  // Notify admins and record audit log
+  // Notify admins, record admin audit log, and store user's own activity
   await Promise.all([
     notifyAdmins({
       type: 'prompt_submitted',
@@ -227,6 +231,20 @@ export async function create(request, response) {
       targetId: prompt._id,
       summary: `Submitted prompt: ${prompt.title}`,
       snapshot: prompt.toObject(),
+    }),
+
+    recordUserActivity({
+      actor: request.user._id,
+      action: 'prompt_submitted',
+      title: 'Prompt submitted',
+      summary: `You submitted “${prompt.title}” for admin review.`,
+      targetType: 'prompt',
+      targetId: prompt._id,
+      relatedPrompt: prompt._id,
+      metadata: {
+        status: prompt.status,
+        visibility: prompt.visibility,
+      },
     }),
   ]);
 
@@ -264,6 +282,23 @@ export async function update(request, response) {
   }
 
   await prompt.save();
+
+  await recordUserActivity({
+    actor: request.user._id,
+    action: 'prompt_updated',
+    title: 'Prompt updated',
+    summary:
+      request.user.role === 'admin'
+        ? `You updated “${prompt.title}”.`
+        : `You updated “${prompt.title}” and it was sent back for admin review.`,
+    targetType: 'prompt',
+    targetId: prompt._id,
+    relatedPrompt: prompt._id,
+    metadata: {
+      status: prompt.status,
+      visibility: prompt.visibility,
+    },
+  });
 
   response.json({
     prompt,
@@ -310,6 +345,19 @@ export async function remove(request, response) {
       summary: `Deleted prompt: ${prompt.title}`,
       snapshot,
     }),
+
+    recordUserActivity({
+      actor: request.user._id,
+      action: 'prompt_deleted',
+      title: 'Prompt deleted',
+      summary: `You deleted “${prompt.title}”.`,
+      targetType: 'prompt',
+      targetId: prompt._id,
+      metadata: {
+        title: prompt.title,
+        visibility: prompt.visibility,
+      },
+    }),
   ]);
 
   response.status(204).end();
@@ -338,6 +386,40 @@ export async function copy(request, response) {
       returnDocument: 'after',
     }
   );
+
+  const jobs = [
+    recordUserActivity({
+      actor: request.user._id,
+      action: 'prompt_copied',
+      title: 'Prompt copied',
+      summary: `You copied “${prompt.title}”.`,
+      targetType: 'prompt',
+      targetId: prompt._id,
+      relatedPrompt: prompt._id,
+      metadata: {
+        promptTitle: prompt.title,
+      },
+    }),
+  ];
+
+  // Notify creator without revealing who copied the prompt.
+  // This is not recorded in admin moderation history.
+  if (String(prompt.creator) !== String(request.user._id)) {
+    jobs.push(
+      notify({
+        recipient: prompt.creator,
+        recipientRole: 'creator',
+        type: 'prompt_copied',
+        title: 'Your prompt was copied',
+        message: `Someone copied your prompt “${prompt.title}”. Your copy count increased to ${updated.copyCount}.`,
+        href: `/prompts/${prompt._id}`,
+        relatedPrompt: prompt._id,
+        eventKey: `prompt_copied:${prompt._id}:${Date.now()}`,
+      })
+    );
+  }
+
+  await Promise.all(jobs);
 
   response.json({
     content: prompt.content,
