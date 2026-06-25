@@ -3,12 +3,13 @@ import Bookmark from '../models/Bookmark.js';
 import Prompt from '../models/Prompt.js';
 import Report from '../models/Report.js';
 import Review from '../models/Review.js';
-import { canAccessPromptContent } from '../services/prompt-access.js';
 import { recordAudit } from '../services/audit-service.js';
 import {
   notify,
   notifyAdmins,
 } from '../services/notification-service.js';
+import { canAccessPromptContent } from '../services/prompt-access.js';
+import { recordUserActivity } from '../services/user-activity-service.js';
 import { AppError } from '../utils/AppError.js';
 
 // Adds or removes bookmark for an approved prompt
@@ -29,6 +30,19 @@ export async function toggleBookmark(request, response) {
   });
 
   if (existing) {
+    await recordUserActivity({
+      actor: request.user._id,
+      action: 'bookmark_removed',
+      title: 'Bookmark removed',
+      summary: `You removed “${prompt.title}” from saved prompts.`,
+      targetType: 'bookmark',
+      targetId: existing._id,
+      relatedPrompt: prompt._id,
+      metadata: {
+        promptTitle: prompt.title,
+      },
+    });
+
     return response.json({
       bookmarked: false,
       message: 'Bookmark removed',
@@ -36,9 +50,22 @@ export async function toggleBookmark(request, response) {
   }
 
   // Otherwise create a new bookmark
-  await Bookmark.create({
+  const bookmark = await Bookmark.create({
     user: request.user._id,
     prompt: prompt._id,
+  });
+
+  await recordUserActivity({
+    actor: request.user._id,
+    action: 'prompt_bookmarked',
+    title: 'Prompt bookmarked',
+    summary: `You saved “${prompt.title}” to your bookmarks.`,
+    targetType: 'bookmark',
+    targetId: bookmark._id,
+    relatedPrompt: prompt._id,
+    metadata: {
+      promptTitle: prompt.title,
+    },
   });
 
   response.json({
@@ -122,26 +149,45 @@ export async function review(request, response) {
     reviewCount: rating?.count || 0,
   });
 
+  const jobs = [
+    recordUserActivity({
+      actor: request.user._id,
+      action: 'review_submitted',
+      title: 'Review submitted',
+      summary: `You reviewed “${prompt.title}” with ${saved.rating} star(s).`,
+      targetType: 'review',
+      targetId: saved._id,
+      relatedPrompt: prompt._id,
+      metadata: {
+        rating: saved.rating,
+        promptTitle: prompt.title,
+      },
+    }),
+  ];
+
   // Notify creator if someone else reviewed their prompt
   if (String(prompt.creator) !== String(request.user._id)) {
-    await notify({
-      recipient: prompt.creator,
-      recipientRole: 'creator',
-      type: 'review_received',
-      title: 'New prompt review',
-      message: `${request.user.name} reviewed “${prompt.title}”.`,
-      href: `/prompts/${prompt._id}`,
-      relatedPrompt: prompt._id,
-      eventKey: `review:${saved._id}:${saved.updatedAt?.getTime() || Date.now()}`,
-    });
+    jobs.push(
+      notify({
+        recipient: prompt.creator,
+        recipientRole: 'creator',
+        type: 'review_received',
+        title: 'New prompt review',
+        message: `${request.user.name} reviewed “${prompt.title}”.`,
+        href: `/prompts/${prompt._id}`,
+        relatedPrompt: prompt._id,
+        eventKey: `review:${saved._id}:${saved.updatedAt?.getTime() || Date.now()}`,
+      })
+    );
   }
+
+  await Promise.all(jobs);
 
   response.status(201).json({
     review: saved,
   });
 }
 
-// Reports a prompt to the admin team
 // Reports a prompt to the admin team
 export async function report(request, response) {
   const input = z
@@ -151,6 +197,7 @@ export async function report(request, response) {
         'Spam',
         'Copyright Violation',
       ]),
+
       description: z
         .string()
         .max(1200)
@@ -167,8 +214,8 @@ export async function report(request, response) {
     throw new AppError(404, 'Prompt not found');
   }
 
-  // Save report record with prompt snapshot
-  // This keeps the original prompt title/details even if the prompt is deleted later.
+  // Save report record with prompt snapshot.
+  // This keeps original prompt details even if the prompt is removed later.
   const saved = await Report.create({
     ...input,
     prompt: prompt._id,
@@ -184,7 +231,7 @@ export async function report(request, response) {
     },
   });
 
-  // Notify admins and record audit log
+  // Notify admins, record admin audit log, and store user's own activity
   await Promise.all([
     notifyAdmins({
       type: 'prompt_reported',
@@ -205,6 +252,20 @@ export async function report(request, response) {
       snapshot: {
         report: saved.toObject(),
         prompt: prompt.toObject(),
+      },
+    }),
+
+    recordUserActivity({
+      actor: request.user._id,
+      action: 'prompt_reported',
+      title: 'Prompt reported',
+      summary: `You reported “${prompt.title}” for ${saved.reason}.`,
+      targetType: 'report',
+      targetId: saved._id,
+      relatedPrompt: prompt._id,
+      metadata: {
+        reason: saved.reason,
+        promptTitle: prompt.title,
       },
     }),
   ]);
