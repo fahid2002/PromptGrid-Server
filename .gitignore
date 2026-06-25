@@ -26,3 +26,5 @@ Thumbs.db
 
 # Isolated feature worktrees
 .worktrees/
+
+db-report.json
