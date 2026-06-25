@@ -284,6 +284,7 @@ export async function allUsers(_request, response) {
 }
 
 // Updates user role from admin dashboard
+// Updates user role from admin dashboard and notifies the affected user
 export async function updateRole(request, response) {
   const role = z
     .enum([
@@ -298,17 +299,56 @@ export async function updateRole(request, response) {
     throw new AppError(400, 'You cannot remove your own admin role');
   }
 
-  response.json({
-    user: await User.findByIdAndUpdate(
-      request.params.id,
-      {
-        role,
+  const targetUser = await User.findById(request.params.id);
+
+  if (!targetUser) {
+    throw new AppError(404, 'User not found');
+  }
+
+  const previousRole = targetUser.role;
+
+  if (previousRole === role) {
+    return response.json({
+      user: targetUser,
+    });
+  }
+
+  targetUser.role = role;
+  await targetUser.save();
+
+  await Promise.all([
+    // Store admin activity
+    recordAudit({
+      actor: request.user._id,
+      action: 'user_role_changed',
+      targetType: 'user',
+      targetId: targetUser._id,
+      summary: `Changed ${targetUser.name}'s role from ${previousRole} to ${role}`,
+      snapshot: {
+        user: {
+          _id: targetUser._id,
+          name: targetUser.name,
+          email: targetUser.email,
+        },
+        previousRole,
+        newRole: role,
       },
-      {
-        returnDocument: 'after',
-        runValidators: true,
-      }
-    ),
+    }),
+
+    // Notify the user/creator/admin whose role was changed
+    notify({
+      recipient: targetUser._id,
+      recipientRole: role,
+      type: 'role_changed',
+      title: 'Your account role was updated',
+      message: `An admin changed your PromptGrid role from ${previousRole} to ${role}. Your dashboard access has been updated.`,
+      href: '/dashboard/profile',
+      eventKey: `role_change:${targetUser._id}:${previousRole}:${role}:${Date.now()}`,
+    }),
+  ]);
+
+  response.json({
+    user: targetUser,
   });
 }
 
@@ -771,6 +811,83 @@ export async function auditHistory(request, response) {
       .populate('actor', 'name email'),
 
     AuditLog.countDocuments(),
+  ]);
+
+  response.json({
+    entries,
+    pagination: {
+      page,
+      limit,
+      total,
+      pages: Math.max(1, Math.ceil(total / limit)),
+    },
+  });
+}
+
+// Returns notification history for the logged-in user
+export async function notificationHistory(request, response) {
+  const {
+    page,
+    limit,
+    skip,
+  } = normalizePagination(request.query);
+
+  const query = {
+    recipient: request.user._id,
+  };
+
+  const [
+    notifications,
+    total,
+  ] = await Promise.all([
+    Notification
+      .find(query)
+      .sort({
+        createdAt: -1,
+      })
+      .skip(skip)
+      .limit(limit),
+
+    Notification.countDocuments(query),
+  ]);
+
+  response.json({
+    notifications,
+    pagination: {
+      page,
+      limit,
+      total,
+      pages: Math.max(1, Math.ceil(total / limit)),
+    },
+  });
+}
+
+// Returns activity history for the logged-in user
+export async function activityHistory(request, response) {
+  const {
+    page,
+    limit,
+    skip,
+  } = normalizePagination(request.query);
+
+  const query = {
+    actor: request.user._id,
+  };
+
+  const [
+    entries,
+    total,
+  ] = await Promise.all([
+    AuditLog
+      .find(query)
+      .sort({
+        createdAt: -1,
+      })
+      .skip(skip)
+      .limit(limit)
+      .populate('actor', 'name email'),
+
+    AuditLog.countDocuments(query),
   ]);
 
   response.json({
