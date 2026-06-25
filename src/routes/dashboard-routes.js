@@ -6,6 +6,7 @@ import {
   allUsers,
   auditHistory,
   creatorAnalytics,
+  deleteActivity,
   deleteReport,
   deleteUser,
   myBookmarks,
@@ -30,11 +31,20 @@ const router = Router();
 
 router.use(authenticate);
 
+// Logged-in user dashboard routes
 router.get('/', asyncHandler(myDashboard));
+
 router.get('/prompts', asyncHandler(myPrompts));
-router.get('/prompts/:id/analytics', asyncHandler(promptAnalytics));
+
+router.get(
+  '/prompts/:id/analytics',
+  asyncHandler(promptAnalytics)
+);
+
 router.get('/bookmarks', asyncHandler(myBookmarks));
+
 router.get('/reviews', asyncHandler(myReviews));
+
 router.get(
   '/notifications',
   asyncHandler(notificationHistory)
@@ -44,12 +54,19 @@ router.get(
   '/activity',
   asyncHandler(activityHistory)
 );
+
+router.delete(
+  '/activity/:id',
+  asyncHandler(deleteActivity)
+);
+
 router.get(
   '/analytics',
   requireRole('creator', 'admin'),
   asyncHandler(creatorAnalytics)
 );
 
+// Admin dashboard routes
 router.get(
   '/admin/stats',
   requireRole('admin'),
@@ -72,11 +89,6 @@ router.patch(
   '/admin/users/:id/role',
   requireRole('admin'),
   asyncHandler(updateRole)
-);
-router.delete(
-  '/admin/reports/:id',
-  requireRole('admin'),
-  asyncHandler(deleteReport)
 );
 
 router.delete(
@@ -113,6 +125,12 @@ router.patch(
   '/admin/reports/:id',
   requireRole('admin'),
   asyncHandler(reportAction)
+);
+
+router.delete(
+  '/admin/reports/:id',
+  requireRole('admin'),
+  asyncHandler(deleteReport)
 );
 
 export default router;
