@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import {
+  activityHistory,
   adminStats,
   allAdminPrompts,
   allUsers,
@@ -11,6 +12,7 @@ import {
   myDashboard,
   myPrompts,
   myReviews,
+  notificationHistory,
   moderatePrompt,
   payments,
   promptAnalytics,
@@ -33,6 +35,15 @@ router.get('/prompts', asyncHandler(myPrompts));
 router.get('/prompts/:id/analytics', asyncHandler(promptAnalytics));
 router.get('/bookmarks', asyncHandler(myBookmarks));
 router.get('/reviews', asyncHandler(myReviews));
+router.get(
+  '/notifications',
+  asyncHandler(notificationHistory)
+);
+
+router.get(
+  '/activity',
+  asyncHandler(activityHistory)
+);
 router.get(
   '/analytics',
   requireRole('creator', 'admin'),
