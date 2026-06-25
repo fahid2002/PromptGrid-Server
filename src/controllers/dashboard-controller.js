@@ -12,6 +12,7 @@ import { recordAudit } from '../services/audit-service.js';
 import { notify } from '../services/notification-service.js';
 import { normalizePagination } from '../services/prompt-query.js';
 import { AppError } from '../utils/AppError.js';
+import UserActivity from '../models/UserActivity.js';
 
 // Shows logged-in user's dashboard summary
 export async function myDashboard(request, response) {
@@ -863,6 +864,7 @@ export async function notificationHistory(request, response) {
 }
 
 // Returns activity history for the logged-in user
+// Returns personal activity history for the logged-in user
 export async function activityHistory(request, response) {
   const {
     page,
@@ -878,16 +880,16 @@ export async function activityHistory(request, response) {
     entries,
     total,
   ] = await Promise.all([
-    AuditLog
+    UserActivity
       .find(query)
       .sort({
         createdAt: -1,
       })
       .skip(skip)
       .limit(limit)
-      .populate('actor', 'name email'),
+      .populate('relatedPrompt', 'title visibility status'),
 
-    AuditLog.countDocuments(query),
+    UserActivity.countDocuments(query),
   ]);
 
   response.json({
@@ -899,4 +901,19 @@ export async function activityHistory(request, response) {
       pages: Math.max(1, Math.ceil(total / limit)),
     },
   });
+}
+// Allows a user to remove an activity item from their own activity log
+export async function deleteActivity(request, response) {
+  const activity = await UserActivity.findOne({
+    _id: request.params.id,
+    actor: request.user._id,
+  });
+
+  if (!activity) {
+    throw new AppError(404, 'Activity not found');
+  }
+
+  await activity.deleteOne();
+
+  response.status(204).end();
 }
