@@ -7,7 +7,9 @@ const schema = z.object({
   MONGODB_URI: z.string().min(1),
   MONGODB_DB: z.string().trim().min(1).default('promptgrid'),
   GEMINI_API_KEY: z.string().trim().min(1).optional(),
-  GEMINI_MODEL: z.string().trim().min(1).default('gemini-2.5-flash'),
+  GEMINI_MODEL: z.string().trim().min(1).default('gemini-3.1-flash-lite').transform((model) => (
+    ['gemini-2.5-flash', 'gemini-3.6-flash'].includes(model) ? 'gemini-3.1-flash-lite' : model
+  )),
   JWT_SECRET: z.string().min(32),
   CLIENT_URL: z.string().url(),
   GOOGLE_CLIENT_ID: z.string().optional(),

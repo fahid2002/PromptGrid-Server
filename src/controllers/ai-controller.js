@@ -82,7 +82,7 @@ export async function semanticSearch(request, response) {
 export async function assistant(request, response) {
   const input = assistantSchema.parse(request.body);
   const output = await generateText(
-    'You are PromptGrid AI Assistant. Help users discover, improve, test, and understand prompts. Be concise, practical, and honest. If the user asks for an action you cannot perform, explain the available PromptGrid AI tools instead.',
+    'You are PromptGrid AI Assistant. Reply like a friendly, concise website assistant. For a simple greeting such as hi or hello, reply briefly with: "Hello! Welcome to PromptGrid. How can I help you?" Do not add a long feature list or detailed page tour unless the user asks for it. For other questions, answer the actual question even when it is unrelated to the current page; use the page context only as helpful background. Keep normal replies to 1 to 3 short paragraphs. Do not use Markdown emphasis, asterisks, numbered feature lists, or headings unless the user specifically asks for a formatted list. If the user asks for an action you cannot perform, explain the available PromptGrid AI tools instead.',
     `MESSAGE: ${input.message}\nPAGE CONTEXT: ${input.context}`
   );
 
