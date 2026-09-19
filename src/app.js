@@ -10,6 +10,7 @@ import {
   notFound,
 } from './middleware/error-handler.js';
 import authRoutes from './routes/auth-routes.js';
+import aiRoutes from './routes/ai-routes.js';
 import dashboardRoutes from './routes/dashboard-routes.js';
 import imageRoutes from './routes/image-routes.js';
 import notificationRoutes from './routes/notification-routes.js';
@@ -76,6 +77,17 @@ app.use(
     legacyHeaders: false,
   }),
   authRoutes
+);
+
+app.use(
+  '/api/ai',
+  rateLimit({
+    windowMs: 15 * 60 * 1000,
+    limit: 40,
+    standardHeaders: 'draft-8',
+    legacyHeaders: false,
+  }),
+  aiRoutes
 );
 
 // Main API routes

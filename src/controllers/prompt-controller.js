@@ -92,7 +92,7 @@ export async function featured(_request, response) {
       visibility: 'public',
     })
     .sort(featuredPromptSort())
-    .limit(6)
+    .limit(3)
     .populate('creator', 'name photoURL');
 
   response.json({
@@ -442,7 +442,7 @@ export async function home(_request, response) {
         visibility: 'public',
       })
       .sort(featuredPromptSort())
-      .limit(6)
+      .limit(3)
       .populate('creator', 'name photoURL'),
 
     Prompt.aggregate([
