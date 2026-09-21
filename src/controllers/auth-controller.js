@@ -9,7 +9,9 @@ import {
   normalizeRegistration,
   REFRESH_COOKIE_NAME,
   REFRESH_SESSION_MS,
+  signMfaChallenge,
   signToken,
+  verifyToken,
   verifyPassword,
 } from '../services/auth-service.js';
 import {
@@ -26,8 +28,18 @@ import { AppError } from '../utils/AppError.js';
 import {
   googleSchema,
   loginSchema,
+  mfaCodeSchema,
+  mfaLoginSchema,
   registerSchema,
 } from '../validators/auth-input.js';
+import {
+  consumeRecoveryCode,
+  createMfaSetup,
+  createRecoveryCodes,
+  decryptMfaSecret,
+  hashRecoveryCodes,
+  verifyMfaCode,
+} from '../services/mfa-service.js';
 
 // Clears all authentication cookies from the response
 function clearSessionCookies(response) {
@@ -64,6 +76,13 @@ async function setSession(response, user) {
     refresh.token,
     cookieOptions(env.NODE_ENV, REFRESH_SESSION_MS)
   );
+}
+
+function mfaChallengeResponse(user) {
+  return {
+    mfaRequired: true,
+    challengeToken: signMfaChallenge(user, env.JWT_SECRET),
+  };
 }
 
 // Registers a new user account
@@ -112,6 +131,10 @@ export async function login(request, response) {
       403,
       `This account is registered as ${user.role}. Select ${user.role} to continue.`
     );
+  }
+
+  if (user.mfaEnabled) {
+    return response.json(mfaChallengeResponse(user));
   }
 
   await setSession(response, user);
@@ -170,12 +193,123 @@ export async function googleLogin(request, response) {
   });
 
   if (shouldCreateGoogleSession(intent)) {
+    if (user.mfaEnabled) return response.json(mfaChallengeResponse(user));
     await setSession(response, user);
   }
 
   response.json({
     user,
   });
+}
+
+// Completes a password or Google login after the MFA challenge is verified
+export async function verifyMfaLogin(request, response) {
+  const input = mfaLoginSchema.parse(request.body);
+  let challenge;
+
+  try {
+    challenge = verifyToken(input.challengeToken, env.JWT_SECRET);
+  } catch {
+    throw new AppError(401, 'Your MFA challenge has expired. Please log in again.');
+  }
+
+  if (challenge.purpose !== 'mfa') {
+    throw new AppError(401, 'Invalid MFA challenge');
+  }
+
+  const user = await User.findById(challenge.sub)
+    .select('+mfaSecretEncrypted +mfaRecoveryCodeHashes');
+
+  if (!user?.mfaEnabled || !user.mfaSecretEncrypted) {
+    throw new AppError(401, 'MFA is not enabled for this account');
+  }
+
+  const secret = decryptMfaSecret(user.mfaSecretEncrypted);
+  const validCode = input.code
+    ? await verifyMfaCode(secret, input.code)
+    : await consumeRecoveryCode(user, input.recoveryCode);
+
+  if (!validCode) throw new AppError(401, 'Invalid MFA code');
+
+  await setSession(response, user);
+  response.json({ user });
+}
+
+// Returns MFA status for the authenticated user
+export async function mfaStatus(request, response) {
+  const user = await User.findById(request.user._id)
+    .select('+mfaRecoveryCodeHashes');
+
+  response.json({
+    enabled: Boolean(user?.mfaEnabled),
+    recoveryCodesRemaining: user?.mfaRecoveryCodeHashes?.length || 0,
+  });
+}
+
+// Creates a pending authenticator setup and returns a QR code
+export async function setupMfa(request, response) {
+  if (request.user.mfaEnabled) throw new AppError(409, 'MFA is already enabled');
+
+  const setup = await createMfaSetup(request.user.email);
+  await User.findByIdAndUpdate(request.user._id, {
+    mfaSecretEncrypted: setup.secretEncrypted,
+    mfaRecoveryCodeHashes: [],
+  });
+
+  response.json({
+    qrCode: setup.qrCode,
+    manualSecret: setup.secret,
+  });
+}
+
+// Verifies the first authenticator code and enables MFA
+export async function enableMfa(request, response) {
+  const { code } = mfaCodeSchema.parse(request.body);
+  const user = await User.findById(request.user._id)
+    .select('+mfaSecretEncrypted +mfaRecoveryCodeHashes');
+
+  if (!user?.mfaSecretEncrypted) throw new AppError(400, 'Start MFA setup first');
+  if (user.mfaEnabled) throw new AppError(409, 'MFA is already enabled');
+
+  const secret = decryptMfaSecret(user.mfaSecretEncrypted);
+  if (!code || !(await verifyMfaCode(secret, code))) {
+    throw new AppError(401, 'Invalid authenticator code');
+  }
+
+  const recoveryCodes = createRecoveryCodes();
+  user.mfaEnabled = true;
+  user.mfaRecoveryCodeHashes = await hashRecoveryCodes(recoveryCodes);
+  await user.save();
+
+  response.json({
+    enabled: true,
+    recoveryCodes,
+  });
+}
+
+// Disables MFA after verifying the current authenticator or recovery code
+export async function disableMfa(request, response) {
+  const input = mfaCodeSchema.parse(request.body);
+  const user = await User.findById(request.user._id)
+    .select('+mfaSecretEncrypted +mfaRecoveryCodeHashes');
+
+  if (!user?.mfaEnabled || !user.mfaSecretEncrypted) {
+    throw new AppError(400, 'MFA is not enabled');
+  }
+
+  const secret = decryptMfaSecret(user.mfaSecretEncrypted);
+  const valid = input.code
+    ? await verifyMfaCode(secret, input.code)
+    : await consumeRecoveryCode(user, input.recoveryCode);
+
+  if (!valid) throw new AppError(401, 'Invalid MFA code');
+
+  user.mfaEnabled = false;
+  user.mfaSecretEncrypted = undefined;
+  user.mfaRecoveryCodeHashes = [];
+  await user.save();
+
+  response.json({ enabled: false });
 }
 
 // Refreshes access token using refresh token session

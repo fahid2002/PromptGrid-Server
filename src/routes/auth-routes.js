@@ -4,8 +4,13 @@ import {
   login,
   logout,
   me,
+  disableMfa,
+  enableMfa,
+  mfaStatus,
   refresh,
   register,
+  setupMfa,
+  verifyMfaLogin,
 } from '../controllers/auth-controller.js';
 import { authenticate } from '../middleware/auth.js';
 import { uploadImage } from '../middleware/upload.js';
@@ -33,6 +38,12 @@ router.post(
   asyncHandler(googleLogin)
 );
 
+// Completes a login after an MFA challenge
+router.post(
+  '/mfa/verify-login',
+  asyncHandler(verifyMfaLogin)
+);
+
 // Refresh session route
 router.post(
   '/refresh',
@@ -51,5 +62,11 @@ router.get(
   authenticate,
   me
 );
+
+// Authenticated MFA setup and management routes
+router.get('/mfa/status', authenticate, asyncHandler(mfaStatus));
+router.post('/mfa/setup', authenticate, asyncHandler(setupMfa));
+router.post('/mfa/enable', authenticate, asyncHandler(enableMfa));
+router.post('/mfa/disable', authenticate, asyncHandler(disableMfa));
 
 export default router;

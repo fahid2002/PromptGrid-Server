@@ -10,6 +10,7 @@ const schema = z.object({
   GEMINI_MODEL: z.string().trim().min(1).default('gemini-3.1-flash-lite').transform((model) => (
     ['gemini-2.5-flash', 'gemini-3.6-flash'].includes(model) ? 'gemini-3.1-flash-lite' : model
   )),
+  MFA_ENCRYPTION_KEY: z.string().trim().regex(/^[a-f0-9]{64}$/i).optional(),
   JWT_SECRET: z.string().min(32),
   CLIENT_URL: z.string().url(),
   GOOGLE_CLIENT_ID: z.string().optional(),

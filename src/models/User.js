@@ -58,6 +58,22 @@ const userSchema = new mongoose.Schema(
 
     premiumSince: Date,
 
+    mfaEnabled: {
+      type: Boolean,
+      default: false,
+    },
+
+    mfaSecretEncrypted: {
+      type: String,
+      select: false,
+    },
+
+    mfaRecoveryCodeHashes: {
+      type: [String],
+      select: false,
+      default: [],
+    },
+
     warnings: [
       {
         reason: String,
@@ -82,6 +98,8 @@ const userSchema = new mongoose.Schema(
       transform: (_doc, value) => {
         delete value.passwordHash;
         delete value.googleSubject;
+        delete value.mfaSecretEncrypted;
+        delete value.mfaRecoveryCodeHashes;
 
         return value;
       },

@@ -5,6 +5,7 @@ export const ACCESS_COOKIE_NAME = 'promptgrid_access';
 export const REFRESH_COOKIE_NAME = 'promptgrid_refresh';
 export const ACCESS_SESSION_MS = 15 * 60 * 1000;
 export const REFRESH_SESSION_MS = 7 * 24 * 60 * 60 * 1000;
+export const MFA_CHALLENGE_MS = 5 * 60 * 1000;
 
 export function normalizeRegistration(input) {
   return {
@@ -26,3 +27,4 @@ export const hashPassword = (password) => bcrypt.hash(password, 12);
 export const verifyPassword = (password, hash) => bcrypt.compare(password, hash);
 export const signToken = (user, secret, sessionId) => jwt.sign({ sub: String(user._id), sid: String(sessionId) }, secret, { expiresIn: '15m', issuer: 'promptgrid-api', audience: 'promptgrid-client' });
 export const verifyToken = (token, secret) => jwt.verify(token, secret, { issuer: 'promptgrid-api', audience: 'promptgrid-client' });
+export const signMfaChallenge = (user, secret) => jwt.sign({ sub: String(user._id), role: user.role, purpose: 'mfa' }, secret, { expiresIn: MFA_CHALLENGE_MS / 1000, issuer: 'promptgrid-api', audience: 'promptgrid-client' });

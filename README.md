@@ -22,6 +22,12 @@ Backend API for **PromptGrid**, an AI Prompt Sharing & Marketplace Platform wher
 * Stripe webhook verification for successful payments
 * Automatic user upgrade to premium after successful payment
 * Admin notification system for important platform events
+* Gemini-powered Prompt Builder and Optimizer API
+* Gemini-powered Prompt Playground API
+* AI Prompt Review API for safety and quality suggestions
+* Semantic Prompt Search API for approved public prompts
+* Authenticated PromptGrid AI Assistant API
+* Protected AI routes using JWT authentication
 * GridFS image upload support
 * MongoDB database with Mongoose
 * Security middleware using Helmet, CORS, rate limiting, and cookie parser
@@ -82,6 +88,10 @@ GOOGLE_CLIENT_ID=your_google_client_id
 GOOGLE_PROJECT_ID=your_google_project_id
 GOOGLE_PROJECT_NUMBER=your_google_project_number
 
+GEMINI_API_KEY=your_gemini_api_key
+GEMINI_MODEL=gemini-3.1-flash-lite
+MFA_ENCRYPTION_KEY=your_64_character_hex_encryption_key
+
 STRIPE_SECRET_KEY=sk_test_your_stripe_secret_key
 STRIPE_WEBHOOK_SECRET=whsec_your_stripe_webhook_secret
 
@@ -105,6 +115,10 @@ CLIENT_URL=https://promptgrid-client.vercel.app
 GOOGLE_CLIENT_ID=your_google_client_id
 GOOGLE_PROJECT_ID=your_google_project_id
 GOOGLE_PROJECT_NUMBER=your_google_project_number
+
+GEMINI_API_KEY=your_gemini_api_key
+GEMINI_MODEL=gemini-3.1-flash-lite
+MFA_ENCRYPTION_KEY=your_64_character_hex_encryption_key
 
 STRIPE_SECRET_KEY=sk_test_your_stripe_secret_key
 STRIPE_WEBHOOK_SECRET=whsec_your_stripe_webhook_secret
@@ -219,6 +233,12 @@ POST   /api/prompts/:id/reviews
 DELETE /api/prompts/:id/reviews
 POST   /api/prompts/:id/report
 
+POST   /api/ai/optimize
+POST   /api/ai/run
+POST   /api/ai/moderate
+POST   /api/ai/search
+POST   /api/ai/assistant
+
 POST   /api/payments/checkout
 GET    /api/payments/session/:sessionId
 POST   /api/payments/webhook
@@ -233,6 +253,38 @@ GET    /api/notifications
 GET    /api/notifications/unread-count
 PATCH  /api/notifications/:id/read
 ```
+
+All `/api/ai/*` routes require an authenticated user. The server uses the configured Gemini model through `@google/genai`; the API key remains server-side and is never sent to the client.
+
+## Multi-factor Authentication
+
+PromptGrid supports optional TOTP-based MFA through an authenticator app. User MFA secrets are encrypted in MongoDB with the server-only `MFA_ENCRYPTION_KEY`, and recovery codes are stored as hashes. Generate a 32-byte key for local development with:
+
+```bash
+node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+```
+
+Never expose `MFA_ENCRYPTION_KEY` to the client or commit it to GitHub. MFA routes are authenticated except for the short-lived login verification challenge:
+
+```txt
+GET    /api/auth/mfa/status
+POST   /api/auth/mfa/setup
+POST   /api/auth/mfa/enable
+POST   /api/auth/mfa/disable
+POST   /api/auth/mfa/verify-login
+```
+
+## AI API Behavior
+
+```txt
+/api/ai/optimize   Returns a structured optimized prompt
+/api/ai/run        Executes a prompt against supplied input
+/api/ai/moderate   Returns safety, quality, score, and suggestions
+/api/ai/search     Ranks up to 60 approved public prompts semantically
+/api/ai/assistant  Returns concise contextual assistant responses
+```
+
+If `GEMINI_MODEL` is not provided, the server uses `gemini-3.1-flash-lite`. Gemini-related failures are converted into safe API error messages instead of exposing provider details.
 
 ## Deployment
 
@@ -256,6 +308,12 @@ Before final submission, verify:
 * User registration works
 * Email/password login works
 * Google login works
+* AI routes reject unauthenticated requests
+* Prompt optimizer returns structured JSON
+* Prompt playground returns generated output
+* AI moderation returns a review result
+* Semantic prompt search returns approved public matches
+* AI assistant responds for authenticated users
 * Public prompts load
 * Premium prompts appear as locked cards for free users
 * Prompt creation works
