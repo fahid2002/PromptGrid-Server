@@ -42,6 +42,8 @@ Backend API for **PromptGrid**, an AI Prompt Sharing & Marketplace Platform wher
 * JWT
 * bcrypt
 * Google OAuth
+* otplib TOTP authentication
+* QRCode generation
 * Stripe Checkout
 * GridFS
 * Helmet
@@ -286,6 +288,48 @@ POST   /api/auth/mfa/verify-login
 
 If `GEMINI_MODEL` is not provided, the server uses `gemini-3.1-flash-lite`. Gemini-related failures are converted into safe API error messages instead of exposing provider details.
 
+## Authentication and Security Flow
+
+### Standard login
+
+```txt
+Credentials or Google OAuth token
+→ Server validates the identity and selected role
+→ If MFA is disabled, access and refresh cookies are created
+→ If MFA is enabled, a five-minute signed MFA challenge is returned
+```
+
+### MFA login
+
+```txt
+Password or Google login
+→ Short-lived MFA challenge
+→ TOTP or one-time recovery code verification
+→ Access and refresh cookies are created only after verification
+```
+
+MFA implementation details:
+
+* TOTP secrets are generated with `otplib`.
+* QR codes are generated server-side with `qrcode`.
+* TOTP secrets are encrypted with AES-256-GCM before MongoDB storage.
+* `MFA_ENCRYPTION_KEY` is a server-only 32-byte hexadecimal key.
+* Recovery codes are shown once and stored only as password hashes.
+* Recovery codes are removed after successful use.
+* MFA secrets, recovery hashes, password hashes, and Google subject identifiers are excluded from normal user JSON responses.
+* Login and authentication routes are rate-limited by the Express application.
+
+Do not rotate `MFA_ENCRYPTION_KEY` while encrypted MFA accounts are in use unless a controlled key migration is performed.
+
+## Data and Access Boundaries
+
+* Public marketplace endpoints expose approved public prompts only.
+* Premium/private prompt content is filtered by server-side access rules.
+* AI routes require authentication and keep the Gemini API key on the server.
+* Dashboard routes apply user, creator, and admin role restrictions.
+* Notification queries are scoped to the authenticated recipient.
+* Refresh tokens are rotated and stored as hashes in MongoDB.
+
 ## Deployment
 
 The server is deployed on Render.
@@ -314,6 +358,11 @@ Before final submission, verify:
 * AI moderation returns a review result
 * Semantic prompt search returns approved public matches
 * AI assistant responds for authenticated users
+* MFA setup creates an authenticator QR code
+* MFA enablement rejects an incorrect code
+* MFA-enabled login requires a valid TOTP code
+* Recovery codes are one-time and are not returned again
+* MFA disable requires a valid current code
 * Public prompts load
 * Premium prompts appear as locked cards for free users
 * Prompt creation works
