@@ -59,11 +59,21 @@ export async function sendVerificationEmail({ to, code, purpose }) {
       </div>
     </div>`;
 
-  await getTransporter().sendMail({
-    from: env.EMAIL_FROM,
-    to,
-    subject: `Your PromptGrid verification code: ${code}`,
-    text: `Your PromptGrid verification code is ${code}. It expires in 10 minutes.`,
-    html,
-  });
+  try {
+    await getTransporter().sendMail({
+      from: env.EMAIL_FROM,
+      to,
+      subject: `Your PromptGrid verification code: ${code}`,
+      text: `Your PromptGrid verification code is ${code}. It expires in 10 minutes.`,
+      html,
+    });
+  } catch (error) {
+    // Log provider metadata only; never log the SMTP password or OTP.
+    console.error('PromptGrid email delivery failed', {
+      code: error.code,
+      responseCode: error.responseCode,
+      command: error.command,
+    });
+    throw new AppError(502, 'Email provider could not send the code. Check the Gmail App Password and SMTP settings.');
+  }
 }
