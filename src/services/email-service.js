@@ -80,7 +80,7 @@ export async function sendVerificationEmail({ to, code, purpose }) {
     let deliveryError = error;
     const canTryStartTls = (
       env.SMTP_PORT !== 587
-      && ['ETIMEDOUT', 'ECONNECTION', 'ESOCKET'].includes(error.code)
+      && ['ETIMEDOUT', 'ECONNECTION', 'ESOCKET', 'ENOTFOUND', 'EAI_AGAIN'].includes(error.code)
     );
 
     if (canTryStartTls) {

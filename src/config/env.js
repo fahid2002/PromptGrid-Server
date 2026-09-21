@@ -15,7 +15,8 @@ const schema = z.object({
   SMTP_PORT: z.coerce.number().default(465),
   SMTP_SECURE: z.string().trim().default('true').transform((value) => value === 'true'),
   SMTP_USER: z.string().email().optional(),
-  SMTP_PASSWORD: z.string().trim().min(1).optional(),
+  // Gmail displays app passwords in grouped characters; remove pasted spaces.
+  SMTP_PASSWORD: z.string().transform((value) => value.replace(/\s/g, '')).pipe(z.string().min(1)).optional(),
   EMAIL_FROM: z.string().trim().min(1).optional(),
   JWT_SECRET: z.string().min(32),
   CLIENT_URL: z.string().url(),
