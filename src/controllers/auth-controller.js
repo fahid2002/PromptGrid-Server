@@ -27,9 +27,13 @@ import {
 import { AppError } from '../utils/AppError.js';
 import {
   googleSchema,
+  emailMfaLoginSchema,
   loginSchema,
   mfaCodeSchema,
   mfaLoginSchema,
+  passwordChangeSchema,
+  passwordResetRequestSchema,
+  passwordResetSchema,
   registerSchema,
 } from '../validators/auth-input.js';
 import {
@@ -40,6 +44,7 @@ import {
   hashRecoveryCodes,
   verifyMfaCode,
 } from '../services/mfa-service.js';
+import { consumeEmailOtp, issueEmailOtp } from '../services/email-otp-service.js';
 
 // Clears all authentication cookies from the response
 function clearSessionCookies(response) {
@@ -233,6 +238,94 @@ export async function verifyMfaLogin(request, response) {
 
   await setSession(response, user);
   response.json({ user });
+}
+
+function verifyMfaChallenge(challengeToken) {
+  let challenge;
+  try {
+    challenge = verifyToken(challengeToken, env.JWT_SECRET);
+  } catch {
+    throw new AppError(401, 'Your MFA challenge has expired. Please log in again.');
+  }
+
+  if (challenge.purpose !== 'mfa') throw new AppError(401, 'Invalid MFA challenge');
+  return challenge;
+}
+
+export async function sendEmailMfaCode(request, response) {
+  const { challengeToken } = request.body;
+  const challenge = verifyMfaChallenge(challengeToken);
+  const user = await User.findById(challenge.sub)
+    .select('+emailOtpHash +emailOtpExpiresAt +emailOtpAttempts +emailOtpPurpose +emailOtpLastSentAt');
+
+  if (!user?.mfaEnabled) throw new AppError(401, 'MFA is not enabled for this account');
+  await issueEmailOtp(user, 'mfa-login');
+  response.json({ sent: true, message: 'A verification code was sent to your account email' });
+}
+
+export async function verifyEmailMfaLogin(request, response) {
+  const input = emailMfaLoginSchema.parse(request.body);
+  const challenge = verifyMfaChallenge(input.challengeToken);
+  const user = await User.findById(challenge.sub)
+    .select('+emailOtpHash +emailOtpExpiresAt +emailOtpAttempts +emailOtpPurpose +emailOtpLastSentAt');
+
+  if (!user?.mfaEnabled || !(await consumeEmailOtp(user, input.code, 'mfa-login'))) {
+    throw new AppError(401, 'Invalid or expired email verification code');
+  }
+
+  await setSession(response, user);
+  response.json({ user });
+}
+
+export async function sendPasswordChangeCode(request, response) {
+  const user = await User.findById(request.user._id)
+    .select('+passwordHash +emailOtpHash +emailOtpExpiresAt +emailOtpAttempts +emailOtpPurpose +emailOtpLastSentAt');
+  if (!user?.passwordHash) throw new AppError(400, 'Set a password before changing it');
+  await issueEmailOtp(user, 'password-change');
+  response.json({ sent: true, message: 'A password-change code was sent to your email' });
+}
+
+export async function changePassword(request, response) {
+  const input = passwordChangeSchema.parse(request.body);
+  const user = await User.findById(request.user._id)
+    .select('+passwordHash +mfaSecretEncrypted +emailOtpHash +emailOtpExpiresAt +emailOtpAttempts +emailOtpPurpose +emailOtpLastSentAt');
+
+  if (!user?.passwordHash || !(await verifyPassword(input.currentPassword, user.passwordHash))) {
+    throw new AppError(401, 'Current password is incorrect');
+  }
+
+  let valid;
+  if (input.method === 'authenticator') {
+    if (!user.mfaEnabled || !user.mfaSecretEncrypted) throw new AppError(400, 'Authenticator MFA is not enabled');
+    valid = await verifyMfaCode(decryptMfaSecret(user.mfaSecretEncrypted), input.code);
+  } else {
+    valid = await consumeEmailOtp(user, input.code, 'password-change');
+  }
+
+  if (!valid) throw new AppError(401, 'Invalid or expired verification code');
+  user.passwordHash = await hashPassword(input.newPassword);
+  await user.save();
+  response.json({ changed: true });
+}
+
+export async function sendPasswordResetCode(request, response) {
+  const { email } = passwordResetRequestSchema.parse(request.body);
+  const user = await User.findOne({ email: email.toLowerCase() })
+    .select('+emailOtpHash +emailOtpExpiresAt +emailOtpAttempts +emailOtpPurpose +emailOtpLastSentAt');
+  if (user) await issueEmailOtp(user, 'password-reset');
+  response.json({ sent: true, message: 'If an account exists, a verification code was sent to that email' });
+}
+
+export async function resetPassword(request, response) {
+  const input = passwordResetSchema.parse(request.body);
+  const user = await User.findOne({ email: input.email.toLowerCase() })
+    .select('+emailOtpHash +emailOtpExpiresAt +emailOtpAttempts +emailOtpPurpose +emailOtpLastSentAt');
+  if (!user || !(await consumeEmailOtp(user, input.code, 'password-reset'))) {
+    throw new AppError(401, 'Invalid or expired email verification code');
+  }
+  user.passwordHash = await hashPassword(input.newPassword);
+  await user.save();
+  response.json({ changed: true });
 }
 
 // Returns MFA status for the authenticated user

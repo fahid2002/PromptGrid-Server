@@ -5,11 +5,17 @@ import {
   logout,
   me,
   disableMfa,
+  changePassword,
   enableMfa,
   mfaStatus,
   refresh,
   register,
   setupMfa,
+  sendEmailMfaCode,
+  sendPasswordChangeCode,
+  sendPasswordResetCode,
+  resetPassword,
+  verifyEmailMfaLogin,
   verifyMfaLogin,
 } from '../controllers/auth-controller.js';
 import { authenticate } from '../middleware/auth.js';
@@ -44,6 +50,12 @@ router.post(
   asyncHandler(verifyMfaLogin)
 );
 
+router.post('/mfa/send-email-login', asyncHandler(sendEmailMfaCode));
+router.post('/mfa/verify-email-login', asyncHandler(verifyEmailMfaLogin));
+
+router.post('/password/reset/send-code', asyncHandler(sendPasswordResetCode));
+router.post('/password/reset', asyncHandler(resetPassword));
+
 // Refresh session route
 router.post(
   '/refresh',
@@ -68,5 +80,7 @@ router.get('/mfa/status', authenticate, asyncHandler(mfaStatus));
 router.post('/mfa/setup', authenticate, asyncHandler(setupMfa));
 router.post('/mfa/enable', authenticate, asyncHandler(enableMfa));
 router.post('/mfa/disable', authenticate, asyncHandler(disableMfa));
+router.post('/password/change/send-code', authenticate, asyncHandler(sendPasswordChangeCode));
+router.post('/password/change', authenticate, asyncHandler(changePassword));
 
 export default router;

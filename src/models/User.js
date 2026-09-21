@@ -74,6 +74,33 @@ const userSchema = new mongoose.Schema(
       default: [],
     },
 
+    emailOtpHash: {
+      type: String,
+      select: false,
+    },
+
+    emailOtpExpiresAt: {
+      type: Date,
+      select: false,
+    },
+
+    emailOtpAttempts: {
+      type: Number,
+      default: 0,
+      select: false,
+    },
+
+    emailOtpPurpose: {
+      type: String,
+      enum: ['mfa-login', 'password-change', 'password-reset'],
+      select: false,
+    },
+
+    emailOtpLastSentAt: {
+      type: Date,
+      select: false,
+    },
+
     warnings: [
       {
         reason: String,
@@ -100,6 +127,11 @@ const userSchema = new mongoose.Schema(
         delete value.googleSubject;
         delete value.mfaSecretEncrypted;
         delete value.mfaRecoveryCodeHashes;
+        delete value.emailOtpHash;
+        delete value.emailOtpExpiresAt;
+        delete value.emailOtpAttempts;
+        delete value.emailOtpPurpose;
+        delete value.emailOtpLastSentAt;
 
         return value;
       },

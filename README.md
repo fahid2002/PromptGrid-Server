@@ -28,6 +28,8 @@ Backend API for **PromptGrid**, an AI Prompt Sharing & Marketplace Platform wher
 * Semantic Prompt Search API for approved public prompts
 * Authenticated PromptGrid AI Assistant API
 * Protected AI routes using JWT authentication
+* Optional Authenticator-app MFA with encrypted TOTP secrets and recovery codes
+* Gmail SMTP Email OTP fallback for MFA login, password changes, and password resets
 * GridFS image upload support
 * MongoDB database with Mongoose
 * Security middleware using Helmet, CORS, rate limiting, and cookie parser
@@ -44,6 +46,7 @@ Backend API for **PromptGrid**, an AI Prompt Sharing & Marketplace Platform wher
 * Google OAuth
 * otplib TOTP authentication
 * QRCode generation
+* Nodemailer Gmail SMTP delivery
 * Stripe Checkout
 * GridFS
 * Helmet
@@ -94,6 +97,14 @@ GEMINI_API_KEY=your_gemini_api_key
 GEMINI_MODEL=gemini-3.1-flash-lite
 MFA_ENCRYPTION_KEY=your_64_character_hex_encryption_key
 
+# Gmail SMTP Email OTP (server-only)
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=465
+SMTP_SECURE=true
+SMTP_USER=your-gmail-address@gmail.com
+SMTP_PASSWORD=your-gmail-app-password
+EMAIL_FROM=PromptGrid Security <your-gmail-address@gmail.com>
+
 STRIPE_SECRET_KEY=sk_test_your_stripe_secret_key
 STRIPE_WEBHOOK_SECRET=whsec_your_stripe_webhook_secret
 
@@ -121,6 +132,14 @@ GOOGLE_PROJECT_NUMBER=your_google_project_number
 GEMINI_API_KEY=your_gemini_api_key
 GEMINI_MODEL=gemini-3.1-flash-lite
 MFA_ENCRYPTION_KEY=your_64_character_hex_encryption_key
+
+# Gmail SMTP Email OTP (server-only)
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=465
+SMTP_SECURE=true
+SMTP_USER=your-gmail-address@gmail.com
+SMTP_PASSWORD=your-gmail-app-password
+EMAIL_FROM=PromptGrid Security <your-gmail-address@gmail.com>
 
 STRIPE_SECRET_KEY=sk_test_your_stripe_secret_key
 STRIPE_WEBHOOK_SECRET=whsec_your_stripe_webhook_secret
@@ -222,6 +241,12 @@ POST   /api/auth/register
 POST   /api/auth/login
 POST   /api/auth/google
 POST   /api/auth/logout
+POST   /api/auth/mfa/send-email-login
+POST   /api/auth/mfa/verify-email-login
+POST   /api/auth/password/reset/send-code
+POST   /api/auth/password/reset
+POST   /api/auth/password/change/send-code
+POST   /api/auth/password/change
 
 GET    /api/prompts
 GET    /api/prompts/home
@@ -274,7 +299,34 @@ POST   /api/auth/mfa/setup
 POST   /api/auth/mfa/enable
 POST   /api/auth/mfa/disable
 POST   /api/auth/mfa/verify-login
+POST   /api/auth/mfa/send-email-login
+POST   /api/auth/mfa/verify-email-login
 ```
+
+### Email OTP verification
+
+PromptGrid supports Gmail-based one-time email codes without requiring a paid domain. The server sends a branded HTML email through Gmail SMTP using the account's 16-character App Password; the Gmail address may be shown as `PromptGrid Security` in the sender name. The App Password is never sent to the browser or stored in client-side environment variables.
+
+Configure these values only on the server (local `.env` and Render environment settings):
+
+```env
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=465
+SMTP_SECURE=true
+SMTP_USER=your-gmail-address@gmail.com
+SMTP_PASSWORD=your-gmail-app-password
+EMAIL_FROM=PromptGrid Security <your-gmail-address@gmail.com>
+```
+
+The Gmail account must have Google 2-Step Verification enabled and an App Password created for the server. Do not use the regular Gmail password. Gmail SMTP uses an encrypted TLS connection in transit; application-level protection is added by hashing OTPs in MongoDB, expiring them after 10 minutes, limiting attempts to five, enforcing a resend cooldown, and invalidating each code after successful use.
+
+Email OTP is available for:
+
+* MFA login as an alternative to the Authenticator app
+* Authenticated password changes, together with the current password
+* Forgot-password recovery
+
+Each OTP is bound to its action (`mfa-login`, `password-change`, or `password-reset`) so a code issued for one purpose cannot be reused for another. Password changes can also be confirmed with the existing Authenticator-app TOTP code.
 
 ## AI API Behavior
 
@@ -318,6 +370,8 @@ MFA implementation details:
 * Recovery codes are removed after successful use.
 * MFA secrets, recovery hashes, password hashes, and Google subject identifiers are excluded from normal user JSON responses.
 * Login and authentication routes are rate-limited by the Express application.
+
+`MFA_ENCRYPTION_KEY` encrypts the TOTP secret used by Google Authenticator or another authenticator app. It is not an email password, Gmail App Password, or OTP code. Keep it unchanged while encrypted MFA accounts are in use; rotating it without migration makes existing authenticator secrets unreadable.
 
 Do not rotate `MFA_ENCRYPTION_KEY` while encrypted MFA accounts are in use unless a controlled key migration is performed.
 
@@ -363,6 +417,11 @@ Before final submission, verify:
 * MFA-enabled login requires a valid TOTP code
 * Recovery codes are one-time and are not returned again
 * MFA disable requires a valid current code
+* Email MFA sends a branded code through Gmail SMTP
+* Email MFA login accepts a valid, unexpired code
+* Password change requires the current password plus either TOTP or Email OTP
+* Forgot-password recovery requires an Email OTP
+* Email OTP codes expire, are attempt-limited, action-bound, and cannot be reused
 * Public prompts load
 * Premium prompts appear as locked cards for free users
 * Prompt creation works

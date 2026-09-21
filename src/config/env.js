@@ -11,6 +11,12 @@ const schema = z.object({
     ['gemini-2.5-flash', 'gemini-3.6-flash'].includes(model) ? 'gemini-3.1-flash-lite' : model
   )),
   MFA_ENCRYPTION_KEY: z.string().trim().regex(/^[a-f0-9]{64}$/i).optional(),
+  SMTP_HOST: z.string().trim().default('smtp.gmail.com'),
+  SMTP_PORT: z.coerce.number().default(465),
+  SMTP_SECURE: z.string().trim().default('true').transform((value) => value === 'true'),
+  SMTP_USER: z.string().email().optional(),
+  SMTP_PASSWORD: z.string().trim().min(1).optional(),
+  EMAIL_FROM: z.string().trim().min(1).optional(),
   JWT_SECRET: z.string().min(32),
   CLIENT_URL: z.string().url(),
   GOOGLE_CLIENT_ID: z.string().optional(),
