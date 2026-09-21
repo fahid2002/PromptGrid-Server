@@ -29,7 +29,8 @@ Backend API for **PromptGrid**, an AI Prompt Sharing & Marketplace Platform wher
 * Authenticated PromptGrid AI Assistant API
 * Protected AI routes using JWT authentication
 * Optional Authenticator-app MFA with encrypted TOTP secrets and recovery codes
-* Gmail SMTP Email OTP fallback for MFA login, password changes, and password resets
+* Resend HTTPS Email API for production Email OTP on Render Free
+* Gmail SMTP Email OTP fallback for local development or paid hosts
 * GridFS image upload support
 * MongoDB database with Mongoose
 * Security middleware using Helmet, CORS, rate limiting, and cookie parser
@@ -46,7 +47,7 @@ Backend API for **PromptGrid**, an AI Prompt Sharing & Marketplace Platform wher
 * Google OAuth
 * otplib TOTP authentication
 * QRCode generation
-* Nodemailer Gmail SMTP delivery
+* Resend Email API and Nodemailer Gmail SMTP delivery
 * Stripe Checkout
 * GridFS
 * Helmet
@@ -105,6 +106,10 @@ SMTP_USER=your-gmail-address@gmail.com
 SMTP_PASSWORD=your-gmail-app-password
 EMAIL_FROM=PromptGrid Security <your-gmail-address@gmail.com>
 
+# Resend Email API (recommended for Render Free; server-only)
+RESEND_API_KEY=re_xxxxxxxxxxxxxxxxxxxxxxxxx
+RESEND_FROM=PromptGrid <onboarding@resend.dev>
+
 STRIPE_SECRET_KEY=sk_test_your_stripe_secret_key
 STRIPE_WEBHOOK_SECRET=whsec_your_stripe_webhook_secret
 
@@ -133,13 +138,17 @@ GEMINI_API_KEY=your_gemini_api_key
 GEMINI_MODEL=gemini-3.1-flash-lite
 MFA_ENCRYPTION_KEY=your_64_character_hex_encryption_key
 
-# Gmail SMTP Email OTP (server-only)
+# Email OTP provider settings (server-only)
+# Render Free blocks outbound SMTP ports, so use Resend in production.
 SMTP_HOST=smtp.gmail.com
 SMTP_PORT=465
 SMTP_SECURE=true
 SMTP_USER=your-gmail-address@gmail.com
 SMTP_PASSWORD=your-gmail-app-password
 EMAIL_FROM=PromptGrid Security <your-gmail-address@gmail.com>
+
+RESEND_API_KEY=re_xxxxxxxxxxxxxxxxxxxxxxxxx
+RESEND_FROM=PromptGrid <onboarding@resend.dev>
 
 STRIPE_SECRET_KEY=sk_test_your_stripe_secret_key
 STRIPE_WEBHOOK_SECRET=whsec_your_stripe_webhook_secret
@@ -305,9 +314,16 @@ POST   /api/auth/mfa/verify-email-login
 
 ### Email OTP verification
 
-PromptGrid supports Gmail-based one-time email codes without requiring a paid domain. The server sends a branded HTML email through Gmail SMTP using the account's 16-character App Password; the Gmail address may be shown as `PromptGrid Security` in the sender name. The App Password is never sent to the browser or stored in client-side environment variables.
+PromptGrid supports one-time email codes for MFA login, password changes, and password resets. In production on Render Free, the server uses the Resend HTTPS Email API because Render blocks outbound SMTP ports. Local development and paid hosts can use Gmail SMTP with a 16-character App Password. The App Password and Resend API key are never sent to the browser or stored in client-side environment variables.
 
-Configure these values only on the server (local `.env` and Render environment settings):
+For Render Free, configure these values only on the server environment:
+
+```env
+RESEND_API_KEY=re_xxxxxxxxxxxxxxxxxxxxxxxxx
+RESEND_FROM=PromptGrid <onboarding@resend.dev>
+```
+
+For local development or a host that permits SMTP, configure:
 
 ```env
 SMTP_HOST=smtp.gmail.com
@@ -318,7 +334,7 @@ SMTP_PASSWORD=your-gmail-app-password
 EMAIL_FROM=PromptGrid Security <your-gmail-address@gmail.com>
 ```
 
-The Gmail account must have Google 2-Step Verification enabled and an App Password created for the server. Do not use the regular Gmail password. Gmail SMTP uses an encrypted TLS connection in transit; application-level protection is added by hashing OTPs in MongoDB, expiring them after 10 minutes, limiting attempts to five, enforcing a resend cooldown, and invalidating each code after successful use.
+The Gmail account must have Google 2-Step Verification enabled and an App Password created for the server. Do not use the regular Gmail password. Resend uses HTTPS; Gmail SMTP uses encrypted TLS in transit. Application-level protection is added by hashing OTPs in MongoDB, expiring them after 10 minutes, limiting attempts to five, enforcing a resend cooldown, and invalidating each code after successful use.
 
 Email OTP is available for:
 
@@ -396,6 +412,8 @@ Start Command: npm start
 Health Check Path: /api/health
 ```
 
+Render Free blocks outbound SMTP ports `25`, `465`, and `587`. Add `RESEND_API_KEY` as a secret environment variable and keep `RESEND_FROM=PromptGrid <onboarding@resend.dev>` unless a verified sender/domain is configured in Resend. Never commit the API key to GitHub.
+
 After changing environment variables, redeploy the Render service.
 
 ## Testing Checklist
@@ -417,7 +435,7 @@ Before final submission, verify:
 * MFA-enabled login requires a valid TOTP code
 * Recovery codes are one-time and are not returned again
 * MFA disable requires a valid current code
-* Email MFA sends a branded code through Gmail SMTP
+* Email MFA sends a branded code through Resend on Render Free or Gmail SMTP locally
 * Email MFA login accepts a valid, unexpired code
 * Password change requires the current password plus either TOTP or Email OTP
 * Forgot-password recovery requires an Email OTP
