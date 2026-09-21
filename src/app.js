@@ -73,6 +73,12 @@ app.use(
   rateLimit({
     windowMs: 15 * 60 * 1000,
     limit: 100,
+    // Session checks and refreshes are not authentication attempts and can
+    // otherwise exhaust the shared deployment IP bucket across open tabs.
+    skip: (request) => (
+      request.path === '/me'
+      || request.path === '/refresh'
+    ),
     standardHeaders: 'draft-8',
     legacyHeaders: false,
   }),
