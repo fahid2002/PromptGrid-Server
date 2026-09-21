@@ -4,6 +4,39 @@ import { AppError } from '../utils/AppError.js';
 
 const transporters = new Map();
 
+async function sendWithResend(message) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 15000);
+
+  try {
+    const response = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${env.RESEND_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        from: env.RESEND_FROM,
+        to: [message.to],
+        subject: message.subject,
+        text: message.text,
+        html: message.html,
+      }),
+      signal: controller.signal,
+    });
+
+    if (!response.ok) {
+      const providerError = await response.json().catch(() => ({}));
+      const error = new Error(providerError.message || 'Resend rejected the email');
+      error.code = 'RESEND_REJECTED';
+      error.responseCode = response.status;
+      throw error;
+    }
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
 function getTransporter(port = env.SMTP_PORT, secure = env.SMTP_SECURE) {
   if (!env.SMTP_USER || !env.SMTP_PASSWORD || !env.EMAIL_FROM) {
     throw new AppError(503, 'Email verification is not configured on the server');
@@ -67,12 +100,29 @@ export async function sendVerificationEmail({ to, code, purpose }) {
     </div>`;
 
   const message = {
-    from: env.EMAIL_FROM,
+    from: env.RESEND_API_KEY
+      ? env.RESEND_FROM
+      : (env.EMAIL_FROM || env.SMTP_USER),
     to,
     subject: `Your PromptGrid verification code: ${code}`,
     text: `Your PromptGrid verification code is ${code}. It expires in 10 minutes.`,
     html,
   };
+
+  // Render Free blocks outbound SMTP ports. Prefer the HTTPS email API there
+  // while keeping Gmail SMTP available for local development or paid hosts.
+  if (env.RESEND_API_KEY) {
+    try {
+      await sendWithResend(message);
+      return;
+    } catch (error) {
+      console.error('PromptGrid Resend delivery failed', {
+        code: error.code,
+        responseCode: error.responseCode,
+      });
+      throw new AppError(502, 'Email provider could not send the code. Check the Resend API key and sender address.');
+    }
+  }
 
   try {
     await getTransporter().sendMail(message);
