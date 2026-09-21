@@ -2,20 +2,27 @@ import nodemailer from 'nodemailer';
 import { env } from '../config/env.js';
 import { AppError } from '../utils/AppError.js';
 
-let transporter;
+const transporters = new Map();
 
-function getTransporter() {
+function getTransporter(port = env.SMTP_PORT, secure = env.SMTP_SECURE) {
   if (!env.SMTP_USER || !env.SMTP_PASSWORD || !env.EMAIL_FROM) {
     throw new AppError(503, 'Email verification is not configured on the server');
   }
 
-  transporter ||= nodemailer.createTransport({
+  const key = `${port}:${secure}`;
+  if (transporters.has(key)) return transporters.get(key);
+
+  const transporter = nodemailer.createTransport({
     host: env.SMTP_HOST,
-    port: env.SMTP_PORT,
-    secure: env.SMTP_SECURE,
+    port,
+    secure,
+    connectionTimeout: 10000,
+    greetingTimeout: 10000,
+    socketTimeout: 15000,
     auth: { user: env.SMTP_USER, pass: env.SMTP_PASSWORD },
   });
 
+  transporters.set(key, transporter);
   return transporter;
 }
 
@@ -59,20 +66,37 @@ export async function sendVerificationEmail({ to, code, purpose }) {
       </div>
     </div>`;
 
+  const message = {
+    from: env.EMAIL_FROM,
+    to,
+    subject: `Your PromptGrid verification code: ${code}`,
+    text: `Your PromptGrid verification code is ${code}. It expires in 10 minutes.`,
+    html,
+  };
+
   try {
-    await getTransporter().sendMail({
-      from: env.EMAIL_FROM,
-      to,
-      subject: `Your PromptGrid verification code: ${code}`,
-      text: `Your PromptGrid verification code is ${code}. It expires in 10 minutes.`,
-      html,
-    });
+    await getTransporter().sendMail(message);
   } catch (error) {
+    let deliveryError = error;
+    const canTryStartTls = (
+      env.SMTP_PORT !== 587
+      && ['ETIMEDOUT', 'ECONNECTION', 'ESOCKET'].includes(error.code)
+    );
+
+    if (canTryStartTls) {
+      try {
+        await getTransporter(587, false).sendMail(message);
+        return;
+      } catch (fallbackError) {
+        deliveryError = fallbackError;
+      }
+    }
+
     // Log provider metadata only; never log the SMTP password or OTP.
     console.error('PromptGrid email delivery failed', {
-      code: error.code,
-      responseCode: error.responseCode,
-      command: error.command,
+      code: deliveryError.code,
+      responseCode: deliveryError.responseCode,
+      command: deliveryError.command,
     });
     throw new AppError(502, 'Email provider could not send the code. Check the Gmail App Password and SMTP settings.');
   }
